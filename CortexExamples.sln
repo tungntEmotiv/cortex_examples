@@ -1,0 +1,38 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio 14
+VisualStudioVersion = 14.0.25420.1
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CortexExamples", "CortexExamples\CortexExamples.csproj", "{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "..\..\..\..\3rdParty\websocket-sharp\Example\Example.csproj", "{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug_Ubuntu|Any CPU = Debug_Ubuntu|Any CPU
+		Debug|Any CPU = Debug|Any CPU
+		Release_Ubuntu|Any CPU = Release_Ubuntu|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug_Ubuntu|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug_Ubuntu|Any CPU.Build.0 = Debug_Ubuntu|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release_Ubuntu|Any CPU.ActiveCfg = Release_Ubuntu|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release_Ubuntu|Any CPU.Build.0 = Release_Ubuntu|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal

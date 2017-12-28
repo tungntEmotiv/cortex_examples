@@ -1,0 +1,10 @@
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\CortexExamples.exe.config
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\CortexExamples.exe
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\CortexExamples.pdb
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\obj\Debug\CortexExamples.csprojResolveAssemblyReference.cache
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\obj\Debug\CortexExamples.exe
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\obj\Debug\CortexExamples.pdb
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\nunit.framework.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\SuperSocket.ClientEngine.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\WebSocket4Net.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\nunit.framework.xml
