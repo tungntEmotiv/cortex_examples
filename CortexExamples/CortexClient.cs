@@ -2,12 +2,25 @@
 using NUnit.Framework;
 using System.Threading;
 using WebSocket4Net;
+using Newtonsoft.Json;
 
 namespace CortexExamples
 {
     class CortexClient
     {
-        private static WebSocket client;
+
+        public CortexClient()
+        {
+            Console.WriteLine("Cortex Client constructor");
+            wsc = new WebSocket(host);
+            wsc.Error += new EventHandler<SuperSocket.ClientEngine.ErrorEventArgs>(webSocketClient_Error);
+            wsc.Opened += new EventHandler(webSocketClient_Opened);
+            wsc.Closed += new EventHandler(webSocketClient_Closed);
+
+            wsc.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
+        }
+
+        private static WebSocket wsc;
         protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
@@ -15,42 +28,60 @@ namespace CortexExamples
         const string host = "wss://emotivcortex.com:54321";
 
         protected string m_CurrentMessage = string.Empty;
-
+        //Open socket
         public void open()
         {
-            client = new WebSocket(host);
-            client.Error += new EventHandler<SuperSocket.ClientEngine.ErrorEventArgs>(webSocketClient_Error);
-            client.Opened += new EventHandler(webSocketClient_Opened);
-            client.Closed += new EventHandler(webSocketClient_Closed);
-
-            client.MessageReceived += new EventHandler<MessageReceivedEventArgs>(webSocketClient_MessageReceived);
             //Open websocket
-            client.Open();
+            wsc.Open();
 
             if (!m_OpenedEvent.WaitOne(10000))
             {
                 Console.WriteLine("Failed to Opened session ontime");
                 //Assert.Fail("Failed to Opened session ontime");
             }
-            Assert.AreEqual(WebSocketState.Open, client.State);
+            Assert.AreEqual(WebSocketState.Open, wsc.State);
 
-            //Send message 
-            client.Send("Hello World");
-            if (!m_MessageReceiveEvent.WaitOne(1000))
-                Assert.Fail("Cannot get response in time!");
+        }
 
-
-            //Close websocket
-
-            client.Close();
+        //Close Socket
+        public void close()
+        {
+            wsc.Close();
 
             if (!m_CloseEvent.WaitOne(1000))
             {
                 Assert.Fail("Failed to close session ontime");
             }
-            Assert.AreEqual(WebSocketState.Closed, client.State);
-
+            Assert.AreEqual(WebSocketState.Closed, wsc.State);
         }
+
+        //Query headset
+
+
+        // login / logout
+
+        // get an authorization token
+
+        // open a session, so we can then get data from a headset
+
+
+        // subscribe to a data stream
+
+        // methods for training
+
+
+        // a generic method to send a RPC request to Cortex
+        private void sendRequest(string method, )
+        {
+            //Send message 
+            wsc.Send("Hello World");
+            if (!m_MessageReceiveEvent.WaitOne(1000))
+                Assert.Fail("Cannot get response in time!");
+        }
+
+        // handle the response to a RPC request
+
+
 
         protected void webSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
