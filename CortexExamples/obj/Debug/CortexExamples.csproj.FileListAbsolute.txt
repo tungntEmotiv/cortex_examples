@@ -8,3 +8,5 @@ D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples
 D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\SuperSocket.ClientEngine.dll
 D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\WebSocket4Net.dll
 D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\nunit.framework.xml
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\Newtonsoft.Json.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\CortexExamples\bin\Debug\Newtonsoft.Json.xml
