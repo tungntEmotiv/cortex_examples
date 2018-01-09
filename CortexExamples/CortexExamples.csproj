@@ -76,7 +76,6 @@
   <ItemGroup>
     <Compile Include="Access.cs" />
     <Compile Include="CortexClient.cs" />
-    <Compile Include="Demo.cs" />
     <Compile Include="Headset.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
