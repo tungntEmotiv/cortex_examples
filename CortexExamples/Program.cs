@@ -7,40 +7,36 @@ namespace CortexExamples
 
         const string Username = "***";
         const string Password = "***";
-        static void Main(string[] args)
-        {
-            Console.WriteLine("Hello World");
-            //new websocket
-            Access a = new Access();
+        //static void Main(string[] args)
+        //{
+        //    Console.WriteLine("Hello World");
+        //    //new websocket
+        //    Access a = new Access();
 
-            //query headset
-            a.QueryHeadset();
-            a.Logout(Username);
-            //a.Login(Username,Password);
-            //a.GetUserLogin();
+        //    //query headset
+        //    a.QueryHeadset();
+        //    a.Logout(Username);
+        //    //a.Login(Username,Password);
+        //    //a.GetUserLogin();
 
-            //stop access
-            a.Stop();
-            //open websocket client
+        //    //stop access
+        //    a.Stop();
+        //    //open websocket client
 
-            //query headset
+        //    //query headset
 
-            //create session
+        //    //create session
 
-            //query session
+        //    //query session
 
-            //query profile
+        //    //query profile
 
-            //Send data
+        //    //Send data
 
-            //getEEG data
+        //    //getEEG data
 
-            //getMotion data
-
-
-
-
-            Console.ReadKey();
-        }
+        //    //getMotion data
+        //    Console.ReadKey();
+        //}
     }
 }

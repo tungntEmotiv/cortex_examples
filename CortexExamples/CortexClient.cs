@@ -82,7 +82,7 @@ namespace CortexExamples
         {
             _wSC.Close();
 
-            if (!m_CloseEvent.WaitOne(1000))
+            if (!m_CloseEvent.WaitOne(10000))
             {
                 Assert.Fail("Failed to close session ontime");
             }
@@ -186,7 +186,7 @@ namespace CortexExamples
                     new JProperty("_auth", _token),
                     new JProperty("session", sessionId),
                     new JProperty("streams", stream));
-            SendRequest("updateSession", param);
+            SendRequest("subscribe", param);
         }
 
         // Unsubcribe
@@ -242,6 +242,13 @@ namespace CortexExamples
             }
             if(response["sid"] != null)
             {
+                double time = (double)response["time"];
+                //JArray jDataArr = (JArray)response;
+
+                //foreach (JObject item in jHeadsetArr)
+                //{
+                //    headsetLists.Add(new Headset(item));
+                //}
 
             }
             else if (response["id"] != null)
@@ -304,14 +311,15 @@ namespace CortexExamples
                 new JProperty("method", method),
                 new JProperty("params", param)
                 );
-
+            Console.WriteLine("SendRequest method: " + method);
             // send the json message
             _methodForRequestId.Add(_nextRequestId, method);
             ++_nextRequestId;
-
             _wSC.Send(request.ToString());
-            if (!m_MessageReceiveEvent.WaitOne(10000))
-                Assert.Fail("Cannot get response in time!");
+
+            //if (!m_MessageReceiveEvent.WaitOne())
+            //    Assert.Fail("Cannot get response in time!");
+            //m_MessageReceiveEvent.Reset();
         }
 
         private void SendRequest(string method)
@@ -326,18 +334,13 @@ namespace CortexExamples
             // send the json message
             _methodForRequestId.Add(_nextRequestId, method);
             ++_nextRequestId;
-
             _wSC.Send(request.ToString());
-            if (!m_MessageReceiveEvent.WaitOne(10000))
-                Assert.Fail("Cannot get response in time!");
-
         }
 
         //Handle response message which not error
         private void HandleResponse(string method, JToken result)
         {
-            Console.WriteLine("method: " + method);
-            Console.WriteLine("result: " + result.ToString());
+            Console.WriteLine("method: " + method + " result: " + result.ToString());
             if (method.Equals("queryHeadsets"))
             {
                 //send event queryHeadsets OK
@@ -348,17 +351,26 @@ namespace CortexExamples
                 {
                     headsetLists.Add(new Headset(item));
                 }
-
-                OnQuerryHeadsetOK(this, headsetLists);
+                if(headsetLists.Count > 0)
+                {
+                    OnQuerryHeadsetOK(this, headsetLists);
+                }
+                else
+                {
+                    Console.WriteLine("No headset avaible");
+                }
+                
 
             }
             else if (method.Equals("getUserLogin"))
             {
                 JArray jUsernameArr = (JArray)result;
                 List<string> usernameList = new List<string>();
-                foreach (JObject item in jUsernameArr)
+
+                foreach (var item in jUsernameArr)
                 {
-                    usernameList.Add((string)item);
+                    string itemObject = (string)item;
+                    usernameList.Add(itemObject);
                 }
                 OnGetUserLoginOK(this, usernameList);
 

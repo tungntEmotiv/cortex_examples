@@ -13,17 +13,41 @@ namespace CortexExamples
         const string ClientId = "qutpR0xoZAJrqsaag41ZQlGmTVGocUSRX9tE7QAp";
         const string ClientSecret = "Z6Dx6t6BHrFsFFdK4BKyGnrj9X8sGYLW9hCjrrzVu6QZGlUeI6dhPq5Q0BuzZeL24tmFd0dyb9V6hM4gdOgODcqLnr6aglpXZD5mYU6ks6dnD9aMaJ8IvwxOUnjlFohO";
 
-        public Access() {
+        public Access() { }
+        public Access(string stream, string license) {
+
+            CortexAccessToken = "";
+            _isLogined = false;
+            SelectedHeadsetId = "";
+            Stream = stream;
+            LicenseId = license;
+            _debitNumber = 1;
+            _isWSCConnected = false;
+            _sessionId = "";
 
             _wSC = new CortexClient();
-
             _wSC.OnConnected += Connected;
             _wSC.OnMessageError += MessageErrorRecieved;
             _wSC.OnGetUserLoginOK += GetUserLoginOK;
             _wSC.OnLoginOK += LoginOK;
             _wSC.OnAuthorizedOK += AuthorizedOK;
             _wSC.OnQuerryHeadsetOK += QuerryHeadsetReceived;
+            _wSC.OnCreateSessionOK += CreateSessionOK;
+            _wSC.OnSubcribeOK += SubcribeOK;
             _wSC.Open();
+        }
+
+        private void SubcribeOK(object sender, string subcribeId)
+        {
+            Console.WriteLine("Subscription successful, sid " + subcribeId);
+        }
+
+        private void CreateSessionOK(object sender, string sessionId)
+        {
+            _sessionId = sessionId;
+
+            // next step: subscribe to a data stream
+            _wSC.Subcribe(_sessionId, Stream);
         }
 
         private void AuthorizedOK(object sender, string token)
@@ -88,8 +112,9 @@ namespace CortexExamples
                 // so you can skip the login procedure and call onAuthorizeOk("your token")
 
                 _isWSCConnected = true;
-                _wSC.GetUserLogin();
                 _wSC.QueryHeadsets();
+                _wSC.GetUserLogin();
+                
 
             }
             else
@@ -102,19 +127,23 @@ namespace CortexExamples
         private void QuerryHeadsetReceived(object sender, List<Headset> headsets)
         {
             Console.WriteLine("QuerryHeadsetReceived");
-            HeadsetLists = new List<Headset>(headsets);
-
-            // we take the first headset
-            // TODO in a real application, you should ask the user to choose a headset from the list
-            SelectedHeadsetId = HeadsetLists[0].HeadsetID;
-
-            Console.WriteLine("Selected HeadsetID " + SelectedHeadsetId);
-            // next step: create a session for this headset
-            if (_isLogined)
+            if(headsets.Count > 0)
             {
-                //
+                HeadsetLists = new List<Headset>(headsets);
+
+                // we take the first headset
+                // TODO in a real application, you should ask the user to choose a headset from the list
+                SelectedHeadsetId = HeadsetLists[0].HeadsetID;
+
+                Console.WriteLine("Selected HeadsetID " + SelectedHeadsetId);
             }
+            else
+            {
+                Console.WriteLine("Please connect to Headset");
+            }
+            
         }
+
         //Recieved error message
         public void MessageErrorRecieved(object sender, MessageErrorEventArgs e)
         {
@@ -145,23 +174,32 @@ namespace CortexExamples
         {
             if (_isWSCConnected)
             {
-                
                 //login
-                _wSC.Login(username, password, ClientId, ClientSecret);
+                if(!IsLogined)
+                {
+                    _wSC.Login(username, password, ClientId, ClientSecret);
+                }
+                else
+                {
+                    Console.WriteLine("Someone logined, Please log out before login");
+                }
+                
             }
         }
 
-        //Get user login
-        public string GetUserLogin()
+        //Get User Login
+        public void QueryUserLogin()
         {
-            //send get userlogin
             _wSC.GetUserLogin();
+        }
 
+        //Get current user
+        public string GetCurrentUser()
+        {
             //resturn userlogin
             return CurrentUser;
 
         }
-
         //Logout
         public void Logout(string username)
         {
@@ -178,6 +216,19 @@ namespace CortexExamples
             _wSC.QueryHeadsets();
         }
 
+        //Create Session
+        public void CreateSession()
+        {
+            if(IsLogined && !string.IsNullOrEmpty(SelectedHeadsetId) && !string.IsNullOrEmpty(CortexAccessToken))
+            {
+                _wSC.CreateSessions(SelectedHeadsetId, !string.IsNullOrEmpty(LicenseId));
+            }
+            else
+            {
+                Console.WriteLine("Please authorize before Create session");
+            }
+        }
+
         
 
 
@@ -189,17 +240,17 @@ namespace CortexExamples
         private string _currentUser;
         private string _licenseId;
         private string _selectedHeadsetId; //selected headset
-        private int _sessionId;
-        private int _experimentId;
-        private int _debitNumber = 10; //default
+        private string _sessionId;
+        //private int _experimentId;
+        private int _debitNumber; //default
 
-        private bool _isWSCConnected = false;
+        private bool _isWSCConnected;
 
         //List headset
 
         private bool _isLogined;
 
-        private Session _session;
+        //private Session _session;
         private CortexClient _wSC;
 
         private List<string> _userLists; //currently, only one user loggined
@@ -228,19 +279,6 @@ namespace CortexExamples
             set
             {
                 _userLists = value;
-            }
-        }
-
-        public int SessionId
-        {
-            get
-            {
-                return _sessionId;
-            }
-
-            set
-            {
-                _sessionId = value;
             }
         }
 
@@ -289,7 +327,6 @@ namespace CortexExamples
             {
                 return _licenseId;
             }
-
             set
             {
                 _licenseId = value;
@@ -319,6 +356,22 @@ namespace CortexExamples
             set
             {
                 _cortexAccessToken = value;
+            }
+        }
+
+        public bool IsLogined
+        {
+            get
+            {
+                return _isLogined;
+            }
+        }
+
+        public string SessionId
+        {
+            get
+            {
+                return _sessionId;
             }
         }
     }

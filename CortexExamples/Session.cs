@@ -29,8 +29,8 @@ namespace CortexExamples
         private string _licenseID;
         private string _status;
         private string _owner;
-        private string _headsetId;
-        private string _experimentId;
+        //private string _headsetId;
+        //private string _experimentId;
         //isRecording
         //start
         //stop
