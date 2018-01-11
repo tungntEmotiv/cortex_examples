@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CortexExamples
+namespace CortexAccess
 {
     //enum HEADSET_TYPE {
     //    TYPE_UNKNOWN = 0,
@@ -14,9 +14,17 @@ namespace CortexExamples
     //    TYPE_INSIGHT
     //}
 
-    class Headset
+    public class Headset
     {
-        //Contructor
+        private string _headsetID;
+        private string _status;
+        private string _type;
+        private string _serialId;
+        private string _firmwareVersion;
+        private string _dongleSerial;
+        private string _connectionType;
+
+        // Contructor
         public Headset()
         {
             _headsetID = "";
@@ -46,16 +54,8 @@ namespace CortexExamples
                 ConnectionType = (string)jHeadset["connectedBy"];
             }
         }
-        //Field
-        private string _headsetID;
-        private string _status;
-        private string _type;
-        private string _serialId;
-        private string _firmwareVersion;
-        private string _dongleSerial;
-        private string _connectionType;
 
-        //Method
+        // Properties
         public string HeadsetID
         {
             get

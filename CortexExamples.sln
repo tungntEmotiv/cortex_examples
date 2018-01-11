@@ -3,9 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 14
 VisualStudioVersion = 14.0.25420.1
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CortexExamples", "CortexExamples\CortexExamples.csproj", "{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CortexAccess", "CortexExamples\CortexAccess.csproj", "{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Example", "..\..\..\..\3rdParty\websocket-sharp\Example\Example.csproj", "{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EEGLogger", "EEGLogger\EEGLogger.csproj", "{EF98366A-15F8-47AF-80F9-A2A11CAA7257}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotionLogger", "MotionLogger\MotionLogger.csproj", "{2B7579BD-A133-4521-9121-9478CD6E6484}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -23,14 +25,22 @@ Global
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug_Ubuntu|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug_Ubuntu|Any CPU.Build.0 = Debug_Ubuntu|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release_Ubuntu|Any CPU.ActiveCfg = Release_Ubuntu|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release_Ubuntu|Any CPU.Build.0 = Release_Ubuntu|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{52805AEC-EFB1-4F42-BB8E-3ED4E692C568}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF98366A-15F8-47AF-80F9-A2A11CAA7257}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2B7579BD-A133-4521-9121-9478CD6E6484}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

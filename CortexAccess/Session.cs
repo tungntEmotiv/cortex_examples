@@ -5,9 +5,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CortexExamples
+namespace CortexAccess
 {
-    class Session
+    public class Session
     {
         //constructor
         public Session() { }

@@ -6,42 +6,52 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Collections.Generic;
 
-namespace CortexExamples
+namespace CortexAccess
 {
-    // CortexClient class work with Cortex Service directly
-    // The class also take care timers
-    class CortexClient
+    public class StreamDataEventArgs
     {
-
-        //const string host = "wss://emotivcortex.com:54321";
-
-        public CortexClient()
+        public StreamDataEventArgs(string sid, string stream, double time, JToken data)
         {
-            Console.WriteLine("Cortex Client constructor");
-            _nextRequestId = 1;
-            _methodForRequestId = new Dictionary<int, string>();
-
-            _wSC = new WebSocket("wss://emotivcortex.com:54321");
-            _wSC.Error += new EventHandler<SuperSocket.ClientEngine.ErrorEventArgs>(WebSocketClient_Error);
-            _wSC.Opened += new EventHandler(WebSocketClient_Opened);
-            _wSC.Closed += new EventHandler(WebSocketClient_Closed);
-
-            _wSC.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketClient_MessageReceived);
+            SID = sid;
+            Stream = stream;
+            Time = time;
+            Data = data;
         }
+        public string SID { get; private set; }
+        public string Stream { get; private set; }
+        public double Time { get; private set; }
+        public JToken Data { get; private set; }
+    }
+    public class MessageErrorEventArgs
+    {
+        public MessageErrorEventArgs(string method, int code, string messageError)
+        {
+            Method = method;
+            Code = code;
+            MessageError = messageError;
+        }
+        public int Code { get; set; }
+        public string MessageError { get; set; }
+        public string Method { get; set; }
+    }
 
-        //Websocket Client
-        private  WebSocket _wSC;
+    // CortexClient class work with Cortex Service directly
+    public class CortexClient
+    {
+        const string Url = "wss://emotivcortex.com:54321";
 
-        protected string m_CurrentMessage = string.Empty;
-        private int _nextRequestId; //unique id for each request
-        //map method with requestID
-        private Dictionary<int, string> _methodForRequestId;
+        // Member variables
+        private WebSocket _wSC; // Websocket Client
+        private int _nextRequestId; // Unique id for each request
+        private Dictionary<int, string> _methodForRequestId; // Map method with requestID
         private string _token;
 
+        protected string m_CurrentMessage = string.Empty;
         //Events
         protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
         protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
+
 
         public event EventHandler<bool> OnConnected;
         public event EventHandler<MessageErrorEventArgs> OnMessageError;
@@ -53,7 +63,33 @@ namespace CortexExamples
         public event EventHandler<string> OnCreateSessionOK;
         public event EventHandler<string> OnSubcribeOK;
         public event EventHandler<string> OnUnsubcribeOK;
+        public event EventHandler<StreamDataEventArgs> OnStreamDataReceived;
 
+        // Constructor
+        public CortexClient()
+        {
+            Console.WriteLine("Cortex Client constructor");
+            _nextRequestId = 1;
+            _methodForRequestId = new Dictionary<int, string>();
+
+            _wSC = new WebSocket(Url);
+            _wSC.Error += new EventHandler<SuperSocket.ClientEngine.ErrorEventArgs>(WebSocketClient_Error);
+            _wSC.Opened += new EventHandler(WebSocketClient_Opened);
+            _wSC.Closed += new EventHandler(WebSocketClient_Closed);
+
+            _wSC.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketClient_MessageReceived);
+        }
+        // Properties
+        public string Token
+        {
+            get
+            {
+                return _token;
+            }
+        }
+
+        // Method
+        // Send request to Cortex Service
         //Open socket
         public void Open()
         {
@@ -73,10 +109,8 @@ namespace CortexExamples
             {
                 OnConnected(this, false);
             }
-            //Assert.AreEqual(WebSocketState.Open, _wSC.State);
 
         }
-
         //Close Socket
         public void Close()
         {
@@ -91,25 +125,22 @@ namespace CortexExamples
             _methodForRequestId.Clear();
             _nextRequestId = 1;
         }
-
         //Query headset
         public void QueryHeadsets()
         {
             SendRequest("queryHeadsets");
         }
-
         // login
         public void Login(string username, string password, string clientId, string clientSecret)
         {
             JObject param = new JObject(
-                    new JProperty("username",username),
+                    new JProperty("username", username),
                     new JProperty("password", password),
                     new JProperty("client_id", clientId),
                     new JProperty("client_secret", clientSecret)
                 );
             SendRequest("login", param);
         }
-
         //Logout
         public void Logout(string username)
         {
@@ -118,13 +149,11 @@ namespace CortexExamples
                 );
             SendRequest("logout", param);
         }
-
         //Get User Login
         public void GetUserLogin()
         {
             SendRequest("getUserLogin");
         }
-
         //Authorize
         public void Authorize()
         {
@@ -132,7 +161,6 @@ namespace CortexExamples
                     new JProperty("debit", 0));
             SendRequest("authorize", param);
         }
-
         public void Authorize(string clientId, string clientSecret, string license, int debitNum)
         {
             JObject param = new JObject(
@@ -144,81 +172,128 @@ namespace CortexExamples
             SendRequest("authorize", param);
         }
 
-        //Query profile
-        public void QueryProfiles()
-        {
-            JObject param = new JObject(
-                    new JProperty("_auth", _token));
-            SendRequest("authorize", param);
-        }
-
+        // Sessions
         //Create Session
         public void CreateSessions(string headsetId, bool activate)
         {
             JObject param = new JObject(
-                    new JProperty("_auth", _token),
+                    new JProperty("_auth", Token),
                     new JProperty("headset", headsetId),
                     new JProperty("status", activate ? "active" : "open"));
             SendRequest("createSession", param);
         }
-
         // Close Session
         public void CloseSessions(string sessionId)
         {
             JObject param = new JObject(
-                    new JProperty("_auth", _token),
+                    new JProperty("_auth", Token),
                     new JProperty("session", sessionId),
-                    new JProperty("status","close"));
+                    new JProperty("status", "close"));
             SendRequest("updateSession", param);
         }
-
-        // updateSession
-
-        // updateSessionNote
-        // sessionStartRecord
-        // sessionStopRecord
-        // sessionAddTags
-        // sessionRemoveTags
-        // subscribe
-        public void Subcribe(string sessionId, string stream)
+        // Update Session
+        public void UpdateSession(string sessionId,  string status, string recordingName, string recordingNote, string recordingSubject)
         {
             JObject param = new JObject(
-                    new JProperty("_auth", _token),
+                    new JProperty("_auth", Token),
                     new JProperty("session", sessionId),
-                    new JProperty("streams", stream));
+                    new JProperty("status", status)
+                    );
+            if(!String.IsNullOrEmpty(recordingName))
+            {
+                param.Add("recordingName", recordingName);
+            }
+            if (!String.IsNullOrEmpty(recordingNote))
+            {
+                param.Add("recordingNote", recordingNote);
+            }
+            if (!String.IsNullOrEmpty(recordingSubject))
+            {
+                param.Add("recordingSubject", recordingSubject);
+            }
+            SendRequest("updateSession", param);
+        }
+        // Update SessionNote
+        public void UpdateSessionNote(string sessionId, string note, string record)
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", Token),
+                    new JProperty("session", sessionId),
+                    new JProperty("note", note),
+                    new JProperty("record", record)
+                    );
+            
+            SendRequest("updateNote", param);
+        }
+        // Query Session
+        public void QuerySessions()
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", Token));
+            SendRequest("querySessions", param);
+        }
+        // SessionStartRecord
+        // SessionStopRecord
+        // SessionAddTags
+        // SessionRemoveTags
+
+        // Subcribe
+        public void Subcribe(string sessionId, string stream)
+        {
+            JArray jStreamArr = new JArray();
+            jStreamArr.Add(stream);
+            JObject param = new JObject(
+                    new JProperty("_auth", Token),
+                    new JProperty("session", sessionId),
+                    new JProperty("streams", jStreamArr));
             SendRequest("subscribe", param);
         }
-
         // Unsubcribe
         public void UnSubcribe(string sessionId, string stream)
         {
             JObject param = new JObject(
-                    new JProperty("_auth", _token),
+                    new JProperty("_auth", Token),
                     new JProperty("session", sessionId),
                     new JProperty("streams", stream));
             SendRequest("unsubscribe", param);
         }
-
-        // Detection Info
-        public void GetDetectionInfo(string detection)
-        {
-            JObject param = new JObject(
-                    new JProperty("_auth", _token),
-                    new JProperty("detection", detection));
-            SendRequest("getDetectionInfo", param);
-        }
-
         // Training
         public void Training(string sessionId, string detection, string action, string control)
         {
             JObject param = new JObject(
-                    new JProperty("_auth", _token),
+                    new JProperty("_auth", Token),
                     new JProperty("session", sessionId),
                     new JProperty("detection", detection),
                     new JProperty("action", action),
                     new JProperty("status", control)
                     );
-            SendRequest("unsubscribe", param);
+            SendRequest("training", param);
+        }
+        // Detection Info
+        public void GetDetectionInfo(string detection)
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", Token),
+                    new JProperty("detection", detection));
+            SendRequest("getDetectionInfo", param);
+        }
+        // Query profile
+        public void QueryProfiles()
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", Token));
+            SendRequest("queryProfile", param);
+        }
+        // Setup profile
+        public void SetupProfiles(string headsetId, string profile, string status)
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", Token),
+                    new JProperty("headset", headsetId),
+                    new JProperty("profile", profile),
+                    new JProperty("status", status)
+                     );
+            SendRequest("setupProfile", param);
         }
 
         // Handle receieved message
@@ -235,26 +310,32 @@ namespace CortexExamples
             if(response["warning"] != null)
             {
                 JObject warning = (JObject)response["warning"];
-
                 string messageWarning = (string)warning["warning"];
                 Console.WriteLine("Received: " + messageWarning);
                 OnMessageError(this, new MessageErrorEventArgs("", -1, messageWarning));
             }
             if(response["sid"] != null)
             {
+                string sid = (string)response["sid"];
                 double time = (double)response["time"];
-                //JArray jDataArr = (JArray)response;
+                string stream = "";
 
-                //foreach (JObject item in jHeadsetArr)
-                //{
-                //    headsetLists.Add(new Headset(item));
-                //}
-
+                JArray jDataArr = new JArray();
+                //jDataArr = (JArray)response["eeg"];
+                foreach (var item in response)
+                {
+                    string key = (string)item.Key;
+                    if(key != "sid" && key != "time")
+                    {
+                        stream = key;
+                        jDataArr = (JArray)item.Value;
+                    }
+                }
+                OnStreamDataReceived(this, new StreamDataEventArgs(sid, stream, time, jDataArr));
             }
             else if (response["id"] != null)
             {
                 int id = (int)response["id"];
-
                 if (id != -1)
                 {
                     // this is a RPC response, we get the method from the id
@@ -264,7 +345,6 @@ namespace CortexExamples
                     JObject error = (JObject)response["error"];
 
                     _methodForRequestId.Remove(id);
-
                     if (error != null)
                     {
                         int code = (int)error["code"];
@@ -316,12 +396,7 @@ namespace CortexExamples
             _methodForRequestId.Add(_nextRequestId, method);
             ++_nextRequestId;
             _wSC.Send(request.ToString());
-
-            //if (!m_MessageReceiveEvent.WaitOne())
-            //    Assert.Fail("Cannot get response in time!");
-            //m_MessageReceiveEvent.Reset();
         }
-
         private void SendRequest(string method)
         {
             JObject request = new JObject(
@@ -359,7 +434,6 @@ namespace CortexExamples
                 {
                     Console.WriteLine("No headset avaible");
                 }
-                
 
             }
             else if (method.Equals("getUserLogin"))
@@ -436,18 +510,5 @@ namespace CortexExamples
                 Console.WriteLine("unkown RPC method:" + method);
             }
         }
-    }
-
-    internal class MessageErrorEventArgs
-    {
-        public MessageErrorEventArgs(string method, int code, string messageError)
-        {
-            Method = method;
-            Code = code;
-            MessageError = messageError;
-        }
-        public int Code { get; set; }
-        public  string MessageError { get; set; }
-        public  string Method { get; set; }
     }
 }
