@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using CortexAccess;
+using System.Threading;
 
 namespace EEGLogger
 {
@@ -12,23 +9,51 @@ namespace EEGLogger
         const string Username = "your_uername";
         const string Password = "your_password";
         const string LicenseId = "your_license";
+        public static AutoResetEvent m_LoginEvent = new AutoResetEvent(false);
+        const int DebitNumber = 2; // default number of debit
+
         static void Main(string[] args)
         {
-            Access a = new Access("eeg", LicenseId);
+            //Access a = new Access("eeg", LicenseId);
 
-            if (!a.IsLogined)
+            //if (!a.IsLogined)
+            //{
+            //    a.Login(Username, Password);
+            //}
+            //while (!a.IsLogined || string.IsNullOrEmpty(a.SelectedHeadsetId) || string.IsNullOrEmpty(a.CortexAccessToken))
+            //{
+            //    //if(string.IsNullOrEmpty(a.SelectedHeadsetId))
+            //    Console.WriteLine("Wait for login and headset connected");
+            //}
+            ////create session
+            //a.CreateSession();
+
+            //while(string.IsNullOrEmpty(a.SessionId))
+            //{
+            //    Console.WriteLine("Wait for create session");
+            //}
+            Process p = new Process();
+            Thread.Sleep(10000); //wait for querrying user login
+            if (String.IsNullOrEmpty(p.GetUserLogin()))
             {
-                a.Login(Username, Password);
+                p.Login(Username, Password);
+                Thread.Sleep(1000); //wait for login
             }
-            while (!a.IsLogined || string.IsNullOrEmpty(a.SelectedHeadsetId) || string.IsNullOrEmpty(a.CortexAccessToken))
+            if (p.AccessCtr.IsLogin)
             {
-                //if(string.IsNullOrEmpty(a.SelectedHeadsetId))
-                Console.WriteLine("Wait for login and headset connected");
+                // Send Authorize
+                p.Authorize(LicenseId, DebitNumber);
+                Thread.Sleep(1000); //wait for authorize
             }
-            //create session
-            a.CreateSession();
+            if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
+            {
+                // Create Sesssion
+
+            }
+
 
             Console.ReadKey();
         }
+
     }
 }

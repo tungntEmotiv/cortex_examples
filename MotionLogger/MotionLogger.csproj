@@ -50,7 +50,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CortexExamples\CortexAccess.csproj">
+    <ProjectReference Include="..\CortexAccess\CortexAccess.csproj">
       <Project>{83e06d8b-c6c9-43e5-ae5d-ca1b2388ef1e}</Project>
       <Name>CortexAccess</Name>
     </ProjectReference>

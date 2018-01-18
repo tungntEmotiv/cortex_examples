@@ -10,17 +10,15 @@ namespace CortexAccess
 {
     public class StreamDataEventArgs
     {
-        public StreamDataEventArgs(string sid, string stream, double time, JToken data)
+        public StreamDataEventArgs(int  streamType, JObject data, int requestType = 0)
         {
-            SID = sid;
-            Stream = stream;
-            Time = time;
+            StreamType = streamType;
+            RequestType = requestType;
             Data = data;
         }
-        public string SID { get; private set; }
-        public string Stream { get; private set; }
-        public double Time { get; private set; }
-        public JToken Data { get; private set; }
+        public int RequestType { get; private set; }
+        public int StreamType { get; private set; }
+        public JObject Data { get; private set; }
     }
     public class MessageErrorEventArgs
     {
@@ -36,21 +34,24 @@ namespace CortexAccess
     }
 
     // CortexClient class work with Cortex Service directly
-    public class CortexClient
+    public sealed class CortexClient
     {
         const string Url = "wss://emotivcortex.com:54321";
 
         // Member variables
+        private static readonly CortexClient instance = new CortexClient();
+
         private WebSocket _wSC; // Websocket Client
         private int _nextRequestId; // Unique id for each request
         private Dictionary<int, string> _methodForRequestId; // Map method with requestID
         private string _token;
+        private bool _isWSConnected;
 
-        protected string m_CurrentMessage = string.Empty;
+        private string m_CurrentMessage = string.Empty;
         //Events
-        protected AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
-        protected AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
-        protected AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
+        private AutoResetEvent m_MessageReceiveEvent = new AutoResetEvent(false);
+        private AutoResetEvent m_OpenedEvent = new AutoResetEvent(false);
+        private AutoResetEvent m_CloseEvent = new AutoResetEvent(false);
 
 
         public event EventHandler<bool> OnConnected;
@@ -64,9 +65,14 @@ namespace CortexAccess
         public event EventHandler<string> OnSubcribeOK;
         public event EventHandler<string> OnUnsubcribeOK;
         public event EventHandler<StreamDataEventArgs> OnStreamDataReceived;
+        public event EventHandler<StreamDataEventArgs> OnEventReceived;
 
         // Constructor
-        public CortexClient()
+        static CortexClient()
+        {
+
+        }
+        private CortexClient()
         {
             Console.WriteLine("Cortex Client constructor");
             _nextRequestId = 1;
@@ -79,6 +85,17 @@ namespace CortexAccess
 
             _wSC.MessageReceived += new EventHandler<MessageReceivedEventArgs>(WebSocketClient_MessageReceived);
         }
+        public static CortexClient Instance
+        {
+            get
+            {
+                return instance;
+            }
+        }
+        //public CortexClient()
+        //{
+            
+        //}
         // Properties
         public string Token
         {
@@ -88,8 +105,51 @@ namespace CortexAccess
             }
         }
 
+        public bool IsWSConnected
+        {
+            get
+            {
+                return _isWSConnected;
+            }
+        }
+
         // Method
         // Send request to Cortex Service
+        public int GenerateRequestedID(int streamType, int requestType)
+        {
+            //int epocTime = (int)(DateTime.UtcNow - new DateTime(1970, 1, 1)).TotalSeconds;
+
+            string requestID = streamType.ToString() + requestType.ToString() + _nextRequestId.ToString();
+            ++_nextRequestId;
+            if( _nextRequestId >=100000)
+            {
+                _nextRequestId = 1; // reset _nextRequestID to avoid overrange Int32 for requestID
+            }
+            return Int32.Parse(requestID);
+        }
+        public int SendTextMessage(JObject param, int streamType, string method, bool hasParam = true, int requestType = 0)
+        {
+            if(!IsWSConnected)
+            {
+                return -1;
+            }
+            int requestID = GenerateRequestedID(streamType, requestType);
+            JObject request = new JObject(
+            new JProperty("jsonrpc", "2.0"),
+            new JProperty("id", requestID),
+            new JProperty("method", method));
+
+            if (hasParam)
+            {
+                request.Add("params", param);
+            }
+            Console.WriteLine("SendRequest method: " + method + " requestID : " + requestID.ToString());
+            // send the json message
+            _methodForRequestId.Add(requestID, method);
+
+            _wSC.Send(request.ToString());
+            return requestID;
+        }
         //Open socket
         public void Open()
         {
@@ -103,10 +163,12 @@ namespace CortexAccess
             }
             if (_wSC.State == WebSocketState.Open)
             {
+                _isWSConnected = true;
                 OnConnected(this, true);
             }
             else
             {
+                _isWSConnected = false;
                 OnConnected(this, false);
             }
 
@@ -299,7 +361,7 @@ namespace CortexAccess
         // Handle receieved message
         // Error message -> emit a error to Access : extract code, message, warning ? 
         // Not error message
-        protected void WebSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
+        private void WebSocketClient_MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             m_CurrentMessage = e.Message;
             m_MessageReceiveEvent.Set();
@@ -311,27 +373,46 @@ namespace CortexAccess
             {
                 JObject warning = (JObject)response["warning"];
                 string messageWarning = (string)warning["warning"];
+                int code = -1;
+                if(warning["code"] != null)
+                    code = (int)warning["code"];
                 Console.WriteLine("Received: " + messageWarning);
-                OnMessageError(this, new MessageErrorEventArgs("", -1, messageWarning));
+
+                OnMessageError(this, new MessageErrorEventArgs("", code, messageWarning));
             }
             if(response["sid"] != null)
             {
                 string sid = (string)response["sid"];
                 double time = (double)response["time"];
-                string stream = "";
-
-                JArray jDataArr = new JArray();
-                //jDataArr = (JArray)response["eeg"];
-                foreach (var item in response)
+                if (response["mot"] != null)
                 {
-                    string key = (string)item.Key;
-                    if(key != "sid" && key != "time")
-                    {
-                        stream = key;
-                        jDataArr = (JArray)item.Value;
-                    }
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.MOTION_STREAM, response));
                 }
-                OnStreamDataReceived(this, new StreamDataEventArgs(sid, stream, time, jDataArr));
+                else if(response["dev"] != null)
+                {
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.DEVICE_STREAM, response));
+                }
+                else if (response["met"] != null)
+                {
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.PERF_METRICS_STREAM, response));
+                }
+                else if (response["com"] != null)
+                {
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.MENTAL_CMD_DATA_STREAM, response));
+                }
+                else if (response["fac"] != null)
+                {
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.FACIAL_EXP_DATA_STREAM, response));
+                }
+                else if (response["sys"] != null)
+                {
+                    OnStreamDataReceived(this, new StreamDataEventArgs((int)StreamID.SYS_STREAM, response));
+                }
+                else
+                {
+                    Console.WriteLine("Can not detect stream type");
+                }
+               
             }
             else if (response["id"] != null)
             {
@@ -344,6 +425,10 @@ namespace CortexAccess
                     JToken result = response["result"];
                     JObject error = (JObject)response["error"];
 
+                    // Get stream type from ID which requestID= streamType.ToString() + requestType.ToString() + epocTime.ToString();
+                    int streamType = Int32.Parse(id.ToString().Substring(0, 2));
+                    int requestType = Int32.Parse(id.ToString().Substring(2, 2));
+
                     _methodForRequestId.Remove(id);
                     if (error != null)
                     {
@@ -355,24 +440,26 @@ namespace CortexAccess
                     }
                     else if (result != null)
                     {
-                        HandleResponse(method, result);
+                        //HandleResponse(method, result);
+                        // Send Event  Message
+                        OnEventReceived(this, new StreamDataEventArgs(streamType, response, requestType));
                     }
 
                 }
             }
         }
 
-        protected void WebSocketClient_Closed(object sender, EventArgs e)
+        private void WebSocketClient_Closed(object sender, EventArgs e)
         {
             m_CloseEvent.Set();
         }
 
-        protected void WebSocketClient_Opened(object sender, EventArgs e)
+        private void WebSocketClient_Opened(object sender, EventArgs e)
         {
             m_OpenedEvent.Set();
         }
 
-        protected void WebSocketClient_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
+        private void WebSocketClient_Error(object sender, SuperSocket.ClientEngine.ErrorEventArgs e)
         {
             Console.WriteLine(e.Exception.GetType() + ":" + e.Exception.Message + Environment.NewLine + e.Exception.StackTrace);
 
@@ -395,6 +482,7 @@ namespace CortexAccess
             // send the json message
             _methodForRequestId.Add(_nextRequestId, method);
             ++_nextRequestId;
+            string messge = request.ToString();
             _wSC.Send(request.ToString());
         }
         private void SendRequest(string method)

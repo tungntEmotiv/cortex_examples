@@ -78,10 +78,16 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Access.cs" />
+    <Compile Include="AccessController.cs" />
+    <Compile Include="BaseController.cs" />
     <Compile Include="CortexClient.cs" />
     <Compile Include="Headset.cs" />
+    <Compile Include="HeadsetController.cs" />
+    <Compile Include="Process.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Session.cs" />
+    <Compile Include="SessionController.cs" />
+    <Compile Include="Utils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

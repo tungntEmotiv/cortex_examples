@@ -40,7 +40,7 @@ namespace CortexAccess
             _isWSCConnected = false;
             _sessionId = "";
 
-            _wSC = new CortexClient();
+            _wSC = CortexClient.Instance;
             _wSC.OnConnected += Connected;
             _wSC.OnMessageError += MessageErrorRecieved;
             //_wSC.OnMessageError += MessageErrorRecieved;
@@ -339,9 +339,9 @@ namespace CortexAccess
         private void StreamDataReceived(object sender, StreamDataEventArgs data)
         {
 
-            Console.Write(data.Stream);
-            Console.WriteLine(data.Data);
-            Console.WriteLine("sid " + data.SID);
+            //Console.Write(data.Stream);
+            //Console.WriteLine(data.Data);
+            //Console.WriteLine("sid " + data.SID);
         }
 
         private void SubcribeOK(object sender, string subcribeId)
