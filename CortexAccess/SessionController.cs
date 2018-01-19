@@ -16,33 +16,124 @@ namespace CortexAccess
             START_RECORD = 12,
             STOP_RECORD = 13,
             INJECT_MARKER = 14,
-            UPDATE_NOTE = 15
+            UPDATE_NOTE = 15,
+            SUBCRIBE_DATA = 16,
+            UNSUBCRIBE_DATA = 17,
+            SUBCRIBE_ALLDATA = 18,
+            UNSUBCRIBE_ALLDATA = 19
         }
 
         // Member variables
         private Session _currentSession;
-        private string _currentSessionID;
+        private string _sessionID;
         //private Record _currentRecord;
-        private int _nextStatus;
+        private string  _nextStatus;
         private bool _isCreateSession;
         private bool _isRecording;
+        private string _recordingName;
+        private string _recordingNote;
+        private string _recordingSubject;
 
         // Constructor
-        public SessionController() { }
+        public SessionController() {
+            NextStatus = "opened";
+            _isCreateSession = false;
+        }
 
         // Properties
+
+        public string NextStatus
+        {
+            get
+            {
+                return _nextStatus;
+            }
+
+            set
+            {
+                _nextStatus = value;
+            }
+        }
+
+        public bool IsCreateSession
+        {
+            get
+            {
+                return _isCreateSession;
+            }
+        }
+
+        public string SessionID
+        {
+            get
+            {
+                return _sessionID;
+            }
+
+            set
+            {
+                _sessionID = value;
+            }
+        }
+
+        public bool IsRecording
+        {
+            get
+            {
+                return _isRecording;
+            }
+        }
+
+        public string RecordingName
+        {
+            get
+            {
+                return _recordingName;
+            }
+
+            set
+            {
+                _recordingName = value;
+            }
+        }
+
+        public string RecordingNote
+        {
+            get
+            {
+                return _recordingNote;
+            }
+
+            set
+            {
+                _recordingNote = value;
+            }
+        }
+
+        public string RecordingSubject
+        {
+            get
+            {
+                return _recordingSubject;
+            }
+
+            set
+            {
+                _recordingSubject = value;
+            }
+        }
 
         // Method
         // Request 
         // Create Session
-        public void CreateSession(string headsetID, string token, string status, string experimentID = "")
+        public void CreateSession(string headsetID, string token, int experimentID = 0)
         {
             JObject param = new JObject(
                     new JProperty("_auth", token),
                     new JProperty("headset", headsetID),
-                    new JProperty("status", status));
+                    new JProperty("status", NextStatus));
 
-            if (!string.IsNullOrEmpty(experimentID))
+            if (experimentID > 0)
             {
                 param.Add("experimentID", experimentID);
             }
@@ -53,14 +144,14 @@ namespace CortexAccess
         // Update Session
         // start Record
         // Stop Record
-        public void UpdateSession(string token,string sessionID, string status, string recordingName = "", string recordingNote= "", string recordingSubject="")
+        public void UpdateSession(string token, string recordingName = "", string recordingNote= "", string recordingSubject="")
         {
             JObject param = new JObject(
                     new JProperty("_auth", token),
-                    new JProperty("session", sessionID),
-                    new JProperty("status", status));
+                    new JProperty("session", SessionID),
+                    new JProperty("status", NextStatus));
 
-            if (status == "startRecord" || status == "stopRecord")
+            if (NextStatus == "startRecord" || NextStatus == "stopRecord")
             {
                 if (!string.IsNullOrEmpty(recordingName))
                     param.Add("recordingName", recordingName);
@@ -74,11 +165,11 @@ namespace CortexAccess
         // Query Sessions
 
         // Update Note
-        public void UpdateNote(string token, string sessionID, string recordID, string note)
+        public void UpdateNote(string token, string recordID, string note)
         {
             JObject param = new JObject(
                     new JProperty("_auth", token),
-                    new JProperty("session", sessionID),
+                    new JProperty("session", SessionID),
                     new JProperty("record", recordID),
                     new JProperty("note", note));
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "updateNote", true, (int)SessionReqType.UPDATE_NOTE);
@@ -95,8 +186,46 @@ namespace CortexAccess
                     new JProperty("time", epocTime));
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "injectMarker", true, (int)SessionReqType.INJECT_MARKER);
             return true;
-        } 
+        }
+        // Request Data
+        public void RequestData(string token, string stream, bool isReplay, bool isSubcribe)
+        {
+            JArray jStreamArr = new JArray();
+            jStreamArr.Add(stream);
 
+            JObject param = new JObject(
+                    new JProperty("_auth", token),
+                    new JProperty("session", SessionID),
+                    new JProperty("streams", jStreamArr),
+                    new JProperty("replay", isReplay));
+
+            if (isSubcribe)
+            {
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "subscribe", true, (int)SessionReqType.SUBCRIBE_DATA);
+            }
+            else
+            {
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_DATA);
+            }
+        }
+        // Request Data
+        public void RequestAllData(string token, string sessionId, bool isReplay, bool isSubcribe)
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", token),
+                    new JProperty("session", sessionId),
+                    new JProperty("streams", new JArray("eeg", "mot", "dev", "met")),
+                    new JProperty("replay", isReplay));
+
+            if (isSubcribe)
+            {
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "subscribe", true, (int)SessionReqType.SUBCRIBE_ALLDATA);
+            }
+            else
+            {
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_ALLDATA);
+            }
+        }
 
         // Handle Event Reponse
         public override void ParseData(JObject data, int requestType)

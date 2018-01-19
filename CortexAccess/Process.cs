@@ -21,6 +21,8 @@ namespace CortexAccess
         private CortexClient _wSC;
         private AccessController _accessCtr;
         private HeadsetController _headsetCtr;
+        private SessionController _sessionCtr;
+        private int _experimentID;
         private bool _isLogined;
         private string _currentUser;
 
@@ -37,7 +39,6 @@ namespace CortexAccess
         
         private string _licenseId;
         private string _selectedHeadsetId; //selected headset
-        private string _sessionId;
         //private int _experimentId;
         private int _debitNumber; //default
         
@@ -54,6 +55,7 @@ namespace CortexAccess
             AccessCtr = AccessController.Instance;
             HeadsetCtr = HeadsetController.Instance;
             _mapControllers = new Dictionary<int, BaseController>();
+            LicenseId = "";
 
             // Event register
             _wSC.OnConnected += Connected;
@@ -95,6 +97,45 @@ namespace CortexAccess
             set
             {
                 _headsetCtr = value;
+            }
+        }
+
+        public SessionController SessionCtr
+        {
+            get
+            {
+                return _sessionCtr;
+            }
+
+            set
+            {
+                _sessionCtr = value;
+            }
+        }
+
+        public int ExperimentID
+        {
+            get
+            {
+                return _experimentID;
+            }
+
+            set
+            {
+                _experimentID = value;
+            }
+        }
+
+        public string LicenseId
+        {
+            get
+            {
+                return _licenseId;
+            }
+
+            set
+            {
+                _licenseId = value;
             }
         }
 
@@ -163,8 +204,45 @@ namespace CortexAccess
 
         }
 
-
         // Create Session
+        public void CreateSession()
+        {
+            if( SessionCtr == null)
+                SessionCtr = new SessionController();
+            if (string.IsNullOrEmpty(LicenseId))
+                SessionCtr.NextStatus = "opened";
+            else
+                SessionCtr.NextStatus = "activated";
+            SessionCtr.CreateSession(GetSelectedHeadsetId(), GetAccessToken(), ExperimentID);
+        }
+
+        // Update Session
+        public void UpdateSession()
+        {
+
+        }
+
+        // Start Record
+        public void StartRecord(string recordName, string recordSubject, string recordNote)
+        {
+            if(SessionCtr.IsCreateSession)
+            {
+                SessionCtr.NextStatus = "startRecord";
+                SessionCtr.RecordingName = recordName;
+                SessionCtr.RecordingSubject = recordSubject;
+                SessionCtr.RecordingNote = recordNote;
+                SessionCtr.UpdateSession(GetAccessToken(), recordName, recordNote, recordSubject);
+            }
+        }
+        // Stop Record
+        public void StopRecord()
+        {
+            if (SessionCtr.IsRecording)
+            {
+                SessionCtr.NextStatus = "stopRecord";
+                SessionCtr.UpdateSession(GetAccessToken(), SessionCtr.RecordingName, SessionCtr.RecordingNote, SessionCtr.RecordingSubject);
+            }
+        }
         // Method
 
         // Query Headset
@@ -184,23 +262,6 @@ namespace CortexAccess
         // Update Session
 
         // Subcribe
-        public void RequestAllData(string token, string sessionId, string streams, bool isReplay, bool isSubcribe)
-        {
-            JObject param = new JObject(
-                    new JProperty("_auth", token),
-                    new JProperty("session", sessionId),
-                    new JProperty("streams", new JArray()),
-                    new JProperty("replay", isReplay));
-
-            if(isSubcribe)
-            {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "subscribe", true, 1);
-            }
-            else
-            {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "unsubscribe", true, 2);
-            }
-        }
 
         // Start Record
 
