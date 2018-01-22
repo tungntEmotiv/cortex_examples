@@ -176,7 +176,7 @@ namespace CortexAccess
         }
 
         // Inject markers
-        public bool InjectMarker(string token, string port, string label, string value, double epocTime)
+        public bool InjectMarker(string token, string port, string label, int value, double epocTime)
         {
             JObject param = new JObject(
                     new JProperty("_auth", token),
@@ -230,7 +230,42 @@ namespace CortexAccess
         // Handle Event Reponse
         public override void ParseData(JObject data, int requestType)
         {
-            throw new NotImplementedException();
+            Console.WriteLine(" Session Controller: parse data ");
+            if (data["result"] != null)
+            {
+                switch (requestType)
+                {
+                    case (int)SessionReqType.CREATE_SESSION:
+
+                        //send event queryHeadsets OK
+                        JToken result = (JToken)data["result"];
+
+                        Console.WriteLine("status " + (string)result["status"]);
+                        // Send create session successfully
+                        
+                        break;
+                    case (int)SessionReqType.SUBCRIBE_DATA:
+                        //send event queryHeadsets OK
+                        JArray jArrResult = (JArray)data["result"];
+                        string sid = "";
+                        foreach (JObject item in jArrResult)
+                        {
+                            sid = (string)item["sid"];
+                        }
+                        Console.WriteLine("sid" + sid);
+                        break;
+
+                    case (int)SessionReqType.START_RECORD:
+                        break;
+                    case (int)SessionReqType.STOP_RECORD:
+                        break;
+                    case (int)SessionReqType.INJECT_MARKER:
+                        break;
+                    default:
+                        break;
+                }
+            }
+            // throw new NotImplementedException();
         }
 
         // Set Record Information

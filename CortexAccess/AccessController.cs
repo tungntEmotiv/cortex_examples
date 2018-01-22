@@ -108,9 +108,7 @@ namespace CortexAccess
         // Authorize
         public void Authorize(string licenseID, int debitNumber)
         {
-            JObject param = new JObject(
-                    new JProperty("client_id", ClientId),
-                    new JProperty("client_secret", ClientSecret) );
+            JObject param = new JObject();
             if (String.IsNullOrEmpty(licenseID))
             {
                 param.Add("debit", 0);
@@ -118,6 +116,8 @@ namespace CortexAccess
             }
             else
             {
+                param.Add("client_id", ClientId);
+                param.Add("client_secret", ClientSecret);
                 param.Add("license", licenseID);
                 param.Add("debit", debitNumber);
             }

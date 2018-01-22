@@ -6,9 +6,9 @@ namespace EEGLogger
 {
     class Program
     {
-        const string Username = "your_uername";
-        const string Password = "your_password";
-        const string LicenseId = "your_license";
+        const string Username = "***";
+        const string Password = "***";
+        const string LicenseId = "";
         public static AutoResetEvent m_LoginEvent = new AutoResetEvent(false);
         const int DebitNumber = 2; // default number of debit
 
@@ -48,6 +48,18 @@ namespace EEGLogger
             if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
             {
                 // Create Sesssion
+                p.CreateSession();
+                Thread.Sleep(1000); //wait for creating session
+
+                if(p.SessionCtr.IsCreateSession)
+                {
+                    Console.WriteLine("Session have created successfully");
+                    // Subcribe data
+                    p.SubcribeData("eeg");
+
+
+
+                }
 
             }
 

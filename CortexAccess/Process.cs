@@ -204,6 +204,12 @@ namespace CortexAccess
 
         }
 
+        // Set status for session
+        //public void SetNextStatus(string status)
+        //{
+        //    SessionCtr.NextStatus = status;
+        //}
+
         // Create Session
         public void CreateSession()
         {
@@ -220,6 +226,23 @@ namespace CortexAccess
         public void UpdateSession()
         {
 
+        }
+
+        // Get current Session
+        public string GetCurrentSessionId()
+        {
+            return SessionCtr.SessionID;
+        }
+
+        // Subcribe data
+        public void SubcribeData(string stream)
+        {
+            SessionCtr.RequestData(GetAccessToken(), stream, false, true);
+        }
+        // Unsubcribe data
+        public void UnSubcribeData(string stream)
+        {
+            SessionCtr.RequestData(GetAccessToken(), stream, false, false);
         }
 
         // Start Record
@@ -242,6 +265,11 @@ namespace CortexAccess
                 SessionCtr.NextStatus = "stopRecord";
                 SessionCtr.UpdateSession(GetAccessToken(), SessionCtr.RecordingName, SessionCtr.RecordingNote, SessionCtr.RecordingSubject);
             }
+        }
+        // Inject marker
+        public bool InjectMarker(string label, int value, double timeStamp)
+        {
+            return SessionCtr.InjectMarker(GetAccessToken(), "Software", label, value, timeStamp);
         }
         // Method
 
