@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Timers;
 
 namespace CortexAccess
 {
@@ -14,13 +15,18 @@ namespace CortexAccess
             QUERRY_HEADSET = 10,
             HEADSET_SETTING = 11
         }
+        public const int QueryHeadsetTime = 10000; // duration to trigger query headset event
 
         // Member variable
         private static readonly HeadsetController _instance = new HeadsetController();
         private string _selectedHeadsetId; //selected headset
         private List<Headset> _headsetLists;
+        private Timer _queryHeadsetTimer;
+        private bool _isConnected;
 
+        // Event
         public event EventHandler<List<Headset>> OnQuerryHeadsetOK;
+        public event EventHandler<string> OnDisconnectHeadset;
 
         // Constructor
         static HeadsetController()
@@ -32,7 +38,19 @@ namespace CortexAccess
             Console.WriteLine("HeadsetController constructor");
             HeadsetLists = new List<Headset>();
             _selectedHeadsetId = "";
+            _isConnected = false;
 
+            // Set Timer
+            _queryHeadsetTimer = new Timer(QueryHeadsetTime);
+            _queryHeadsetTimer.Elapsed += OnTimeoutEvent;
+            _queryHeadsetTimer.AutoReset = true;
+            _queryHeadsetTimer.Enabled = true;
+
+        }
+
+        private void OnTimeoutEvent(object sender, ElapsedEventArgs e)
+        {
+            Instance.QueryHeadsets();
         }
 
         // Properties
@@ -69,8 +87,22 @@ namespace CortexAccess
             }
         }
 
+        public bool IsConnected
+        {
+            get
+            {
+                return _isConnected;
+            }
+        }
 
         // Methods
+        // Send request to Websocket client
+        public void QueryHeadsets()
+        {
+            JObject param = new JObject();
+            CortexClient.Instance.SendTextMessage(param, (int)StreamID.HEADSETS_STREAM, "queryHeadsets", true, (int)HeadsetRqType.QUERRY_HEADSET);
+        }
+
         public override void ParseData(JObject data, int requestType)
         {
 
@@ -83,19 +115,44 @@ namespace CortexAccess
                         //send event queryHeadsets OK
                         JArray jHeadsetArr = (JArray)data["result"];
 
+                        List<Headset> headsetLists = new List<Headset>();
+
                         foreach (JObject item in jHeadsetArr)
                         {
-                            HeadsetLists.Add(new Headset(item));
+                            headsetLists.Add(new Headset(item));
+
+                            //HeadsetLists.Add(new Headset(item));
                         }
-                        if (HeadsetLists.Count > 0)
+                        if (headsetLists.Count > 0)
                         {
                             // Set element 0 as current headset
-                            SelectedHeadsetId = HeadsetLists[0].HeadsetID;
-                            Console.WriteLine("Selected HeadsetID " + SelectedHeadsetId);
-                            OnQuerryHeadsetOK(this, new List<Headset>( HeadsetLists));
+                            HeadsetLists = headsetLists.ToList();
+
+                            if (HeadsetLists[0].Status == "paired")
+                            {
+                                OnDisconnectHeadset(this, HeadsetLists[0].HeadsetID);
+
+                                // TODO: Switch to next available headset
+                            }
+                            else if(HeadsetLists[0].Status == "connected")
+                            {
+                                _isConnected = true;
+                                if (!SelectedHeadsetId.Contains(HeadsetLists[0].HeadsetID))
+                                {
+                                    SelectedHeadsetId = HeadsetLists[0].HeadsetID;
+                                    Console.WriteLine("Selected HeadsetID " + SelectedHeadsetId);
+                                    OnQuerryHeadsetOK(this, new List<Headset>(HeadsetLists));
+                                }
+                            }
                         }
                         else
                         {
+                            SelectedHeadsetId = "";
+                            _isConnected = false;
+                            HeadsetLists.Clear();
+
+                            // Send Disconnect Event
+                            OnDisconnectHeadset(this, "");
                             Console.WriteLine("No headset avaible");
                         }
                         break;
@@ -103,13 +160,6 @@ namespace CortexAccess
                         break;
                 }
             }
-        }
-
-        // Send request to Websocket client
-        public void QueryHeadsets()
-        {
-            JObject param = new JObject();
-            CortexClient.Instance.SendTextMessage(param, (int)StreamID.QUERY_HEADSETS_STREAM, "queryHeadsets", true, (int)HeadsetRqType.QUERRY_HEADSET);
         }
     }
 }

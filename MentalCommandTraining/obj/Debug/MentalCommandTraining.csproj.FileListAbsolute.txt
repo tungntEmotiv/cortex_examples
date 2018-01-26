@@ -1,0 +1,15 @@
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\MentalCommandTraining.exe.config
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\MentalCommandTraining.exe
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\MentalCommandTraining.pdb
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\CortexAccess.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\Newtonsoft.Json.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\WebSocket4Net.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\SuperSocket.ClientEngine.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\nunit.framework.dll
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\CortexAccess.pdb
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\Newtonsoft.Json.xml
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\bin\Debug\nunit.framework.xml
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\obj\Debug\MentalCommandTraining.csprojResolveAssemblyReference.cache
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\obj\Debug\MentalCommandTraining.csproj.MentalCommandTraining.exe.config
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\obj\Debug\MentalCommandTraining.exe
+D:\Emotiv_Project\Source_code\Cortex_Source\Examples\CortexCSharp\CortexExamples\MentalCommandTraining\obj\Debug\MentalCommandTraining.pdb

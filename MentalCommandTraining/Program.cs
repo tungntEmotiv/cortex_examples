@@ -1,12 +1,12 @@
-﻿using System;
+﻿using CortexAccess;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
-using CortexAccess;
 using System.Threading;
+using System.Threading.Tasks;
 
-namespace MotionLogger
+namespace MentalCommandTraining
 {
     class Program
     {
@@ -14,8 +14,10 @@ namespace MotionLogger
         const string Password = "your_password";
         const string LicenseId = "your_license";
         const int DebitNumber = 2; // default number of debit
+
         static void Main(string[] args)
         {
+
             Process p = new Process();
             Thread.Sleep(5000); //wait for querrying user login
             if (String.IsNullOrEmpty(p.GetUserLogin()))
@@ -29,6 +31,10 @@ namespace MotionLogger
                 p.Authorize(LicenseId, DebitNumber);
                 Thread.Sleep(5000); //wait for authorize
             }
+            // get Detection Information
+            p.QuerryDetectionInfo("mentalCommand");
+            Thread.Sleep(2000); //wait for get detection information
+
             if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
             {
                 // Create Sesssion
@@ -38,15 +44,32 @@ namespace MotionLogger
                 if (p.IsCreateSession)
                 {
                     Console.WriteLine("Session have created successfully");
-                    // Subcribe data
-                    p.SubcribeData("mot");
+                    // Subcribe sys event
+                    p.SubcribeData("sys");
                     Thread.Sleep(5000);
                 }
-
             }
+            // Create / load a profile
+            p.LoadProfile("24_1_18_3"); // Or create a new Profile
+            Thread.Sleep(2000);
+            // Training neutral
+            p.StartCmd("neutral");
+            Thread.Sleep(20000);
+            p.AcceptCmd();
+            Thread.Sleep(2000);
+            // Training push
+            p.StartCmd("push");
+            Thread.Sleep(10000);
+            p.AcceptCmd();
+            Thread.Sleep(2000);
 
-            Console.WriteLine("Press Enter to exit");
-            while (Console.ReadKey().Key != ConsoleKey.Enter) { }
+            // Save profile
+            p.SaveProfile();
+            Thread.Sleep(3000);
+            // Subcribe com event -> show training result
+            p.SubcribeData("com");
+            Thread.Sleep(5000);
+
         }
     }
 }

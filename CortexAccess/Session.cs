@@ -15,31 +15,39 @@ namespace CortexAccess
         public Session(JObject jSession)
         {
             //need check null
+            if (jSession["headset"] != null)
+            {
+                Headset = new Headset((JObject)jSession["headset"]);
+            }
             SessionID = (string)jSession["id"];
             Status = (string)jSession["status"];
             LicenseID = (string)jSession["license"];
-            
-            string headset = (string)jSession["headset"];
-            Owner = (string)jSession["owner"];
-            //Headset = (Headset)jSession["headset"];
+            StartedTime = (string)jSession["started"];
+            JToken stopVal = jSession.GetValue("stopped");
+            if (stopVal.Type != JTokenType.Null)
+            {
+                StoppedTime = (string)jSession["stopped"];
+            }
+            JToken recordingVal = jSession.GetValue("recording");
+            if(recordingVal.Type != JTokenType.Null)
+            {
+                IsRecording = (bool)jSession["recording"];
+            }
+
         }
 
         //Field
+        private Headset _headset;
         private string _sessionID;
         private string _licenseID;
+        //private string _profileID;
+        // Markers
+        private bool _isRecording;
+        private string _startedTime;
+        private string _stoppedTime;
+
         private string _status;
         private string _owner;
-        //private string _headsetId;
-        //private string _experimentId;
-        //isRecording
-        //start
-        //stop
-        //stream {}
-        //tags
-        //subject
-
-
-        private Headset _headset;
 
         public string SessionID
         {
@@ -92,8 +100,46 @@ namespace CortexAccess
                 _owner = value;
             }
         }
+        public bool IsRecording
+        {
+            get
+            {
+                return _isRecording;
+            }
 
-        public  Headset Headset
+            set
+            {
+                _isRecording = value;
+            }
+        }
+
+        public string StartedTime
+        {
+            get
+            {
+                return _startedTime;
+            }
+
+            set
+            {
+                _startedTime = value;
+            }
+        }
+
+        public string StoppedTime
+        {
+            get
+            {
+                return _stoppedTime;
+            }
+
+            set
+            {
+                _stoppedTime = value;
+            }
+        }
+
+        public Headset Headset
         {
             get
             {

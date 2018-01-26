@@ -18,8 +18,9 @@ namespace CortexAccess
             REDEBIT = 13,
             GET_CLOUD_TOKEN = 14
         }
-        const string ClientId = "qutpR0xoZAJrqsaag41ZQlGmTVGocUSRX9tE7QAp";
-        const string ClientSecret = "Z6Dx6t6BHrFsFFdK4BKyGnrj9X8sGYLW9hCjrrzVu6QZGlUeI6dhPq5Q0BuzZeL24tmFd0dyb9V6hM4gdOgODcqLnr6aglpXZD5mYU6ks6dnD9aMaJ8IvwxOUnjlFohO";
+        const string ClientId = "yourClientId";
+        const string ClientSecret = "yourClientSecret";
+
         // Member variable
         private static readonly AccessController _instance = new AccessController();
         private bool _isLogin;
@@ -87,7 +88,7 @@ namespace CortexAccess
         }
 
         // Method
-
+        // Clear Token
         public void ClearAccessToken()
         {
             _currentAccessToken = "";
@@ -131,7 +132,7 @@ namespace CortexAccess
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.AUTHORIZE_STREAM, "getUserLogin", false, (int)AccessState.CHECK_LOGGED);
         }
         // RefreshToken
-        public void RefreshToken()
+        public void GenerateNewToken()
         {
             JObject param = new JObject(
                     new JProperty("token", CurrentAccessToken));
@@ -211,21 +212,7 @@ namespace CortexAccess
                     default:
                         break;
                 }
-
-                
             }
-            
-
-
         }
-
-        // Check license info
-
-        // Check valid license
-
-
-
-
-
     }
 }

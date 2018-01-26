@@ -9,38 +9,59 @@ namespace CortexAccess
 {
     public class SessionController : BaseController
     {
+        private static readonly SessionController _instance = new SessionController();
+
         public enum SessionReqType : int
         {
             CREATE_SESSION = 10,
             UPDATE_SESSION = 11,
-            START_RECORD = 12,
-            STOP_RECORD = 13,
-            INJECT_MARKER = 14,
-            UPDATE_NOTE = 15,
-            SUBCRIBE_DATA = 16,
-            UNSUBCRIBE_DATA = 17,
-            SUBCRIBE_ALLDATA = 18,
-            UNSUBCRIBE_ALLDATA = 19
+            QUERRY_SESSION = 12,
+            CLOSE_SESSION = 13,
+            START_RECORD = 20,
+            STOP_RECORD = 21,
+            INJECT_MARKER = 22,
+            UPDATE_NOTE = 23,
+            SUBCRIBE_DATA = 30,
+            UNSUBCRIBE_DATA = 31,
+            SUBCRIBE_ALLDATA = 32,
+            UNSUBCRIBE_ALLDATA = 33
         }
 
         // Member variables
-        private Session _currentSession;
+        private List<Session> _sessionLists;
+
         private string _sessionID;
         //private Record _currentRecord;
         private string  _nextStatus;
         private bool _isCreateSession;
         private bool _isRecording;
+        private string _recordID;
+
         private string _recordingName;
         private string _recordingNote;
         private string _recordingSubject;
 
         // Constructor
-        public SessionController() {
+        // Constructor
+        static SessionController()
+        {
+
+        }
+        private SessionController()
+        {
+            Console.WriteLine("SessionController constructor");
             NextStatus = "opened";
             _isCreateSession = false;
         }
 
         // Properties
+        public static SessionController Instance
+        {
+            get
+            {
+                return _instance;
+            }
+        }
 
         public string NextStatus
         {
@@ -123,6 +144,32 @@ namespace CortexAccess
             }
         }
 
+        public List<Session> SessionLists
+        {
+            get
+            {
+                return _sessionLists;
+            }
+
+            set
+            {
+                _sessionLists = value;
+            }
+        }
+
+        public string RecordID
+        {
+            get
+            {
+                return _recordID;
+            }
+
+            set
+            {
+                _recordID = value;
+            }
+        }
+
         // Method
         // Request 
         // Create Session
@@ -151,6 +198,8 @@ namespace CortexAccess
                     new JProperty("session", SessionID),
                     new JProperty("status", NextStatus));
 
+            int sessionReqType = (int)SessionReqType.UPDATE_SESSION;
+
             if (NextStatus == "startRecord" || NextStatus == "stopRecord")
             {
                 if (!string.IsNullOrEmpty(recordingName))
@@ -160,10 +209,36 @@ namespace CortexAccess
                 if (!string.IsNullOrEmpty(recordingName))
                     param.Add("recordingNote", recordingNote);
             }
-            CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "updateSession", true, (int)SessionReqType.UPDATE_SESSION);
+            if (NextStatus == "startRecord")
+                sessionReqType = (int)SessionReqType.START_RECORD;
+            else if (NextStatus == "stopRecord")
+                sessionReqType = (int)SessionReqType.STOP_RECORD;
+
+            CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "updateSession", true, sessionReqType);
         }
         // Query Sessions
+        public void QuerrySession(string token, string queryCondition = "")
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", token));
 
+            if(!string.IsNullOrEmpty(queryCondition))
+            {
+                param.Add("query", new JObject(new JProperty("status", queryCondition)));
+            }
+
+            CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "querySessions", true, (int)SessionReqType.QUERRY_SESSION);
+        }
+
+        // Close Session
+        public void CloseSession(string token)
+        {
+            JObject param = new JObject(
+                    new JProperty("_auth", token),
+                    new JProperty("session", SessionID),
+                    new JProperty("status", "close"));
+            CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "updateSession", true, (int)SessionReqType.CLOSE_SESSION);
+        }
         // Update Note
         public void UpdateNote(string token, string recordID, string note)
         {
@@ -176,7 +251,7 @@ namespace CortexAccess
         }
 
         // Inject markers
-        public bool InjectMarker(string token, string port, string label, int value, double epocTime)
+        public bool InjectMarker(string token, string port, string label, int value, Int64 epocTime)
         {
             JObject param = new JObject(
                     new JProperty("_auth", token),
@@ -196,16 +271,16 @@ namespace CortexAccess
             JObject param = new JObject(
                     new JProperty("_auth", token),
                     new JProperty("session", SessionID),
-                    new JProperty("streams", jStreamArr),
-                    new JProperty("replay", isReplay));
+                    new JProperty("streams", jStreamArr));
+                    //new JProperty("replay", isReplay));
 
             if (isSubcribe)
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "subscribe", true, (int)SessionReqType.SUBCRIBE_DATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "subscribe", true, (int)SessionReqType.SUBCRIBE_DATA);
             }
             else
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_DATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_DATA);
             }
         }
         // Request Data
@@ -219,47 +294,82 @@ namespace CortexAccess
 
             if (isSubcribe)
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "subscribe", true, (int)SessionReqType.SUBCRIBE_ALLDATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "subscribe", true, (int)SessionReqType.SUBCRIBE_ALLDATA);
             }
             else
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SUBSCRIBE_DATA, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_ALLDATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_ALLDATA);
             }
         }
 
         // Handle Event Reponse
         public override void ParseData(JObject data, int requestType)
         {
-            Console.WriteLine(" Session Controller: parse data ");
+            Console.WriteLine(" Session Controller: reqType" + requestType.ToString());
+            
             if (data["result"] != null)
             {
+                JToken result = (JToken)data["result"];
                 switch (requestType)
                 {
                     case (int)SessionReqType.CREATE_SESSION:
+                        // TODO: Store headset setting
 
-                        //send event queryHeadsets OK
-                        JToken result = (JToken)data["result"];
-
+                        // TODO: Store markers
+                        string status = (string)result["status"];
+                        if (status == "activated" || status == "opened")
+                        {
+                            _isCreateSession = true;
+                            SessionID = (string)result["id"];
+                        }
+                        else
+                        {
+                            _isCreateSession = false;
+                            _sessionID = "";
+                        }
                         Console.WriteLine("status " + (string)result["status"]);
                         // Send create session successfully
-                        
+                        break;
+                    case (int)SessionReqType.QUERRY_SESSION:
+                        //send event queryHeadsets OK
+                        JArray jSessions = (JArray)data["result"];
+
+                        List<Session> sessionLists = new List<Session>();
+
+                        foreach (JObject item in jSessions)
+                        {
+                            sessionLists.Add(new Session(item));
+                        }
+                        if(sessionLists.Count > 0)
+                        {
+                            SessionLists = sessionLists.ToList();
+                        }
                         break;
                     case (int)SessionReqType.SUBCRIBE_DATA:
                         //send event queryHeadsets OK
-                        JArray jArrResult = (JArray)data["result"];
+                        JArray jArrResult = (JArray)result;
                         string sid = "";
                         foreach (JObject item in jArrResult)
                         {
                             sid = (string)item["sid"];
                         }
-                        Console.WriteLine("sid" + sid);
+                        Console.WriteLine("sid " + sid);
                         break;
-
                     case (int)SessionReqType.START_RECORD:
-                        break;
+                        {
+                            // Store record information
+                            _isRecording = (bool)result["recording"];
+                            break;
+                        }
                     case (int)SessionReqType.STOP_RECORD:
+                        JToken recordInfo = data["result"];
+                        _isRecording = (bool)result["recording"];
+                        // Send stop event
                         break;
                     case (int)SessionReqType.INJECT_MARKER:
+                        // Store marker
+                        JArray markers = (JArray)result["markers"];
+
                         break;
                     default:
                         break;
@@ -271,6 +381,19 @@ namespace CortexAccess
         // Set Record Information
 
         // Get Current Record Information
+
+        // Clear Session Info
+        public void ClearSessionControllerData()
+        {
+            SessionLists = null;
+            SessionID = "";
+            NextStatus = "close";
+            _isCreateSession = false;
+            _isRecording = false;
+            RecordingName = "";
+            RecordingNote = "";
+            RecordingSubject = "";
+    }
 
 
     }

@@ -9,6 +9,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MotionLogger", "MotionLogge
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CortexAccess", "CortexAccess\CortexAccess.csproj", "{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecordData", "RecordData\RecordData.csproj", "{EEF73BB5-2146-421B-80AA-5FC93404E574}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentalCommandTraining", "MentalCommandTraining\MentalCommandTraining.csproj", "{9891B889-B3D7-4922-9853-7481387AD812}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Ubuntu|Any CPU = Debug_Ubuntu|Any CPU
@@ -41,6 +45,22 @@ Global
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83E06D8B-C6C9-43E5-AE5D-CA1B2388EF1E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EEF73BB5-2146-421B-80AA-5FC93404E574}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9891B889-B3D7-4922-9853-7481387AD812}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
