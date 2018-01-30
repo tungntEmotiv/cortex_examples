@@ -13,6 +13,8 @@ namespace RecordData
 
         static void Main(string[] args)
         {
+            Console.WriteLine("RECORD DATA DEMO");
+            Console.WriteLine("Please wear Headset with good signal!!!");
 
             Process p = new Process();
             Thread.Sleep(5000); //wait for querrying user login
@@ -21,12 +23,16 @@ namespace RecordData
                 p.Login(Username, Password);
                 Thread.Sleep(1000); //wait for login
             }
+            // Show username login
+            Console.WriteLine("Username :" + p.GetUserLogin());
+
             if (p.AccessCtr.IsLogin)
             {
                 // Send Authorize
                 p.Authorize(LicenseId, DebitNumber);
                 Thread.Sleep(5000); //wait for authorize
             }
+
             if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
             {
                 // Create Sesssion
@@ -39,47 +45,50 @@ namespace RecordData
                 if (p.IsCreateSession)
                 {
                     Console.WriteLine("Session have created successfully");
-                    // Start record data
-                    p.StartRecord("260118_3", "test4", "helloworld");
-
-                    Thread.Sleep(5000);
                 }
 
             }
-            Console.WriteLine("Press Q to querry session and quit");
-            Console.WriteLine("Press A,B,C to inject marker");
-            Console.WriteLine("Press S to stop");
+            Console.WriteLine("Press S to start");
             Console.WriteLine("Press N to start a new Record");
+            Console.WriteLine("Press A,B,C to inject marker");
+            Console.WriteLine("Press E to end of a record (stop record)");
+            Console.WriteLine("Press Q to querry session and quit");
+
             while (true) {
 
                 int key = (int)Console.ReadKey().Key;
 
-                if (key == (int)ConsoleKey.S)
+                if (key == (int)ConsoleKey.E)
                 {
                     p.StopRecord();
                     Thread.Sleep(5000);
                 }
+                else if (key == (int)ConsoleKey.S) // start record
+                {
+                    p.StartRecord("300118_1", "test4", "helloworld");
+                    Thread.Sleep(5000);
+                }
                 else if (key == (int)ConsoleKey.N) // next start record
                 {
-                    p.StartRecord("260118_4", "test5", "helloyou");
+                    p.StartRecord("300118_2", "test5", "helloyou");
                     Thread.Sleep(5000);
                 }
                 else if(key == (int)ConsoleKey.A)
                 {
                     // Inject marker
-                    p.InjectMarker("A", 1,Utils.GetEpochTimeNow());
+                    p.InjectMarker("A", 10,Utils.GetEpochTimeNow());
 
                 }
                 else if (key == (int)ConsoleKey.B)
                 {
                     // Inject marker
-                    p.InjectMarker("B", 2, Utils.GetEpochTimeNow());
+                    p.InjectMarker("B", 11, Utils.GetEpochTimeNow());
 
                 }
                 else if (key == (int)ConsoleKey.C)
                 {
                     // Inject marker
-                    p.InjectMarker("C", 3, Utils.GetEpochTimeNow());
+                    p.InjectMarker("C", 12, Utils.GetEpochTimeNow());
 
                 }
                 else if (key == (int)ConsoleKey.Q)

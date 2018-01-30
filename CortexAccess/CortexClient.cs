@@ -41,7 +41,6 @@ namespace CortexAccess
 
         private WebSocket _wSC; // Websocket Client
         private int _nextRequestId; // Unique id for each request
-        private string _token;
         private bool _isWSConnected;
 
         private string m_CurrentMessage = string.Empty;
@@ -53,14 +52,6 @@ namespace CortexAccess
 
         public event EventHandler<bool> OnConnected;
         public event EventHandler<MessageErrorEventArgs> OnMessageError;
-        public event EventHandler<List<Headset>> OnQuerryHeadsetOK;
-        public event EventHandler<List<string>> OnGetUserLoginOK;
-        public event EventHandler<bool> OnLoginOK;
-        public event EventHandler<bool> OnLogoutOK;
-        public event EventHandler<string> OnAuthorizedOK;
-        public event EventHandler<string> OnCreateSessionOK;
-        public event EventHandler<string> OnSubcribeOK;
-        public event EventHandler<string> OnUnsubcribeOK;
         public event EventHandler<StreamDataEventArgs> OnStreamDataReceived;
         public event EventHandler<StreamDataEventArgs> OnEventReceived;
 
@@ -71,7 +62,6 @@ namespace CortexAccess
         }
         private CortexClient()
         {
-            Console.WriteLine("Cortex Client constructor");
             _nextRequestId = 1;
 
             _wSC = new WebSocket(Url);
@@ -87,14 +77,6 @@ namespace CortexAccess
             get
             {
                 return instance;
-            }
-        }
-        
-        public string Token
-        {
-            get
-            {
-                return _token;
             }
         }
 
@@ -136,8 +118,8 @@ namespace CortexAccess
             {
                 request.Add("params", param);
             }
-            Console.WriteLine("Send " + method);
-            Console.WriteLine(request.ToString());
+            //Console.WriteLine("Send " + method);
+            //Console.WriteLine(request.ToString());
 
             // send the json message
             _wSC.Send(request.ToString());
@@ -184,7 +166,7 @@ namespace CortexAccess
         {
             m_CurrentMessage = e.Message;
             m_MessageReceiveEvent.Set();
-            Console.WriteLine("Received: " + e.Message);
+            //Console.WriteLine("Received: " + e.Message);
 
             JObject response = JObject.Parse(e.Message);
 

@@ -1,12 +1,8 @@
 ﻿using CortexAccess;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
-namespace MentalCommandTraining
+namespace FacialExpressionTraining
 {
     class Program
     {
@@ -15,9 +11,8 @@ namespace MentalCommandTraining
 
         static void Main(string[] args)
         {
-            Console.WriteLine("MENTAL COMMAND TRAINING");
+            Console.WriteLine("FACIAL EXPRESSION TRAINING");
             Console.WriteLine("Please wear Headset with good signal!!!");
-
             Process p = new Process();
             Thread.Sleep(5000); //wait for querrying user login
             if (String.IsNullOrEmpty(p.GetUserLogin()))
@@ -25,6 +20,7 @@ namespace MentalCommandTraining
                 p.Login(Username, Password);
                 Thread.Sleep(1000); //wait for login
             }
+
             // Show username login
             Console.WriteLine("Username :" + p.GetUserLogin());
 
@@ -34,8 +30,9 @@ namespace MentalCommandTraining
                 p.Authorize();
                 Thread.Sleep(5000); //wait for authorize
             }
+
             // get Detection Information
-            //p.QuerryDetectionInfo("mentalCommand");
+            //p.QuerryDetectionInfo("facialExpression");
             //Thread.Sleep(2000); //wait for get detection information
 
             if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
@@ -53,41 +50,40 @@ namespace MentalCommandTraining
                 }
             }
             // Create / load a profile
-            Console.WriteLine("Load a profile");
-            p.LoadProfile("MENTAL_29_1_18_1"); // Load profile if existed or create a new Profile
+            Console.WriteLine("Create a profile");
+            p.LoadProfile("FE_30_1_18_2"); // Load an existed profile or create a new Profile
             Thread.Sleep(2000);
             // Training neutral
             Console.WriteLine("\n###### Train NEUTRAL Action");
-            p.StartCmd("neutral");
+            p.StartFE("neutral");
             Thread.Sleep(10000);
-            p.AcceptCmd();
-            Thread.Sleep(2000);
-            // Training push
-            Console.WriteLine("\n###### Train PUSH Action");
-            p.StartCmd("push");
-            Thread.Sleep(10000);
-            p.AcceptCmd();
+            p.AcceptFE();
             Thread.Sleep(2000);
 
-            // Training pull
-            Console.WriteLine("\n###### Train PULL Action");
-            p.StartCmd("pull");
+            // Training blink
+            //p.StartFE("blink"); // Currently, can not train blink action
+            //Thread.Sleep(10000);
+            //p.AcceptFE();
+            //Thread.Sleep(2000);
+
+            // Training smile
+            Console.WriteLine("\n###### Train SMILE Action");
+            p.StartFE("smile");
             Thread.Sleep(10000);
-            p.AcceptCmd();
+            p.AcceptFE();
             Thread.Sleep(2000);
 
             // Save profile
             p.SaveProfile();
-            Thread.Sleep(3000);
+            Thread.Sleep(5000);
 
-            // Upload profile
+            // Upload Profile
             //p.UploadProfile();
             //Thread.Sleep(3000);
 
-            // Subcribe com event -> show training result
-            p.SubcribeData("com");
+            // Subcribe fac event -> show training result
+            p.SubcribeData("fac");
             Thread.Sleep(5000);
-
         }
     }
 }

@@ -18,8 +18,8 @@ namespace CortexAccess
             REDEBIT = 13,
             GET_CLOUD_TOKEN = 14
         }
-        const string ClientId = "yourClientId";
-        const string ClientSecret = "yourClientSecret";
+        const string ClientId = "your_clientID";
+        const string ClientSecret = "your_ClientSecret";
 
         // Member variable
         private static readonly AccessController _instance = new AccessController();
@@ -39,7 +39,6 @@ namespace CortexAccess
         }
         private AccessController()
         {
-            Console.WriteLine("AccessController constructor");
             _isLogin = false;
             _currentAccessToken = "";
             _currentUserLogin = "";
@@ -188,7 +187,7 @@ namespace CortexAccess
                         break;
                     case (int)AccessState.LOGIN:
 
-                        Console.WriteLine("Login successfull");
+                        Console.WriteLine("Login successfully");
                         if(String.IsNullOrEmpty(_currentUserLogin))
                         {
                             QueryUserLogin();

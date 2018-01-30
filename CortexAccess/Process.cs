@@ -1,5 +1,6 @@
 ﻿using Newtonsoft.Json.Linq;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,6 +19,12 @@ namespace CortexAccess
         private int _experimentID;
         private Dictionary<int, BaseController> _mapControllers;
         private string _licenseId;
+
+        // Event
+        public event EventHandler<ArrayList> OnMotionDataReceived;
+        public event EventHandler<ArrayList> OnEEGDataReceived;
+        public event EventHandler<ArrayList> OnDevDataReceived;
+        public event EventHandler<ArrayList> OnPerfDataReceived;
 
         // Constructor
         public Process()
@@ -211,7 +218,7 @@ namespace CortexAccess
         public void CreateSession()
         {
             if (string.IsNullOrEmpty(LicenseId))
-                SessionCtr.NextStatus = "opened";
+                SessionCtr.NextStatus = "open";
             else
                 SessionCtr.NextStatus = "active";
             if (!SessionCtr.IsCreateSession)
@@ -239,6 +246,7 @@ namespace CortexAccess
         public void SubcribeData(string stream)
         {
             SessionCtr.RequestData(GetAccessToken(), stream, false, true);
+            //SessionCtr.RequestAllData(GetAccessToken(), GetCurrentSessionID(), false, true);
         }
         // Unsubcribe data
         public void UnSubcribeData(string stream)
@@ -278,14 +286,11 @@ namespace CortexAccess
         {
             return SessionCtr.InjectMarker(GetAccessToken(), "USB", label, value, timeStamp);
         }
-        
-        
         // Get Detection Information
         public void QuerryDetectionInfo(string detection)
         {
             TrainingCtr.QuerryDetectionInformation(detection);
         }
-
         // Profile
         // Querry profile of user
         public void QuerryProfiles()
@@ -308,7 +313,7 @@ namespace CortexAccess
         // Save a profile
         public void SaveProfile()
         {
-            TrainingCtr.SaveProfile(GetAccessToken(), TrainingCtr.CurrentProfileName);
+            TrainingCtr.SaveProfile(GetAccessToken(), GetSelectedHeadsetId(), TrainingCtr.CurrentProfileName);
         }
         // Delete a profile
         public void DeleteProfile(string profileName)
@@ -319,6 +324,11 @@ namespace CortexAccess
         public void EditProfile(string profileName, string newProfileName)
         {
             TrainingCtr.EditProfile(GetAccessToken(), profileName, newProfileName);
+        }
+        // Upload Profile
+        public void UploadProfile()
+        {
+            TrainingCtr.UploadProfile(GetAccessToken(), TrainingCtr.CurrentProfileName);
         }
         // Training
         // Start Mental Command Training
@@ -390,37 +400,71 @@ namespace CortexAccess
             // Send to corresponding Controller
             int streamType = evt.StreamType;
             int requestType = evt.RequestType;
-            
 
             switch (streamType)
             {
                 case (int)StreamID.MOTION_STREAM:
-                    Console.WriteLine("Motion data");
-                    JArray motData = (JArray)evt.Data["mot"];
-                    foreach(var item in motData)
+                    Console.WriteLine("Motion data received");
+                    ArrayList motionData = new ArrayList();
+                    JArray jMotData = (JArray)evt.Data["mot"];
+                    foreach(var item in jMotData)
                     {
-                        Console.Write(item.ToString());
+                        motionData.Add((float)item);
                     }
-                    Console.WriteLine("\n");
+                    if (motionData.Count > 0)
+                    {
+                        OnMotionDataReceived(this, new ArrayList(motionData));
+                    }
                     break;
                 case (int)StreamID.EEG_STREAM:
-                    Console.WriteLine("EEG data");
-                    JArray eegData = (JArray)evt.Data["eeg"];
-                    foreach (var item in eegData)
+                    Console.WriteLine("EEG data received");
+                    ArrayList eegData = new ArrayList();
+
+                    JArray jEEGData = (JArray)evt.Data["eeg"];
+                    foreach (var item in jEEGData)
                     {
-                        Console.Write(item.ToString() + ",");
+                        eegData.Add((float)item);
                     }
-                    Console.WriteLine("\n");
+                    if(eegData.Count > 0)
+                    {
+                        OnEEGDataReceived(this, new ArrayList(eegData));
+                    }
+                    break;
+                case (int)StreamID.DEVICE_STREAM:
+                    Console.WriteLine("Device data received");
+                    ArrayList devData = new ArrayList();
+
+                    JArray jDevData = (JArray)evt.Data["dev"];
+                    foreach (var item in jDevData)
+                    {
+                        devData.Add((float)item);
+                    }
+                    if (devData.Count > 0)
+                    {
+                        OnDevDataReceived(this, new ArrayList(devData));
+                    }
+                    break;
+                case (int)StreamID.PERF_METRICS_STREAM:
+                    Console.WriteLine("Performance metrics data received");
+                    ArrayList perfData = new ArrayList();
+
+                    JArray jPerfData = (JArray)evt.Data["met"];
+                    foreach (var item in jPerfData)
+                    {
+                        perfData.Add((float)item);
+                    }
+                    if (perfData.Count > 0)
+                    {
+                        OnPerfDataReceived(this, new ArrayList(perfData));
+                    }
                     break;
                 case (int)StreamID.SYS_STREAM:
-                    Console.WriteLine("System event");
-                    Console.WriteLine("\n");
+                    JArray jSysEvent = (JArray)evt.Data["sys"];
+                    Console.WriteLine("Sys Event received: " + jSysEvent[0] + " : " + jSysEvent[1]);
                     break;
                 default:
                     break;
             }
-                
-            
         }
 
         private void Connected(object sender, bool isConnected)
@@ -428,17 +472,6 @@ namespace CortexAccess
             if (isConnected)
             {
                 Console.WriteLine("Websocket Client Connected");
-
-                // After connected to Cortex, client must obtain token for working with cortex, by using one of below actions:
-                //  client.getUserLogin(): then logout, then login with username/password;
-                //  client.login(): Login with username/password;
-                //  client.authorize(): Get token from Cortex
-                //  client.authorize(clientId, clientSecrect, liencense);
-                //  client.setToken("You token"): Tell client to use old token (which be saved before)
-
-                // first step: get the current user
-                // Note: if you already have a token, you can reuse it
-                // so you can skip the login procedure and call onAuthorizeOk("your token")
                 if (!AccessCtr.IsLogin)
                     AccessCtr.QueryUserLogin();
                 // Query Headset

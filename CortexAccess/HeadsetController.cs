@@ -35,7 +35,6 @@ namespace CortexAccess
         }
         private HeadsetController()
         {
-            Console.WriteLine("HeadsetController constructor");
             HeadsetLists = new List<Headset>();
             _selectedHeadsetId = "";
             _isConnected = false;

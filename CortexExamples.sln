@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RecordData", "RecordData\Re
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MentalCommandTraining", "MentalCommandTraining\MentalCommandTraining.csproj", "{9891B889-B3D7-4922-9853-7481387AD812}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FacialExpressionTraining", "FacialExpressionTraining\FacialExpressionTraining.csproj", "{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug_Ubuntu|Any CPU = Debug_Ubuntu|Any CPU
@@ -61,6 +63,14 @@ Global
 		{9891B889-B3D7-4922-9853-7481387AD812}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
 		{9891B889-B3D7-4922-9853-7481387AD812}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9891B889-B3D7-4922-9853-7481387AD812}.Release|Any CPU.Build.0 = Release|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Debug_Ubuntu|Any CPU.ActiveCfg = Debug|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Debug_Ubuntu|Any CPU.Build.0 = Debug|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Release_Ubuntu|Any CPU.ActiveCfg = Release|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Release_Ubuntu|Any CPU.Build.0 = Release|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{78CCA0D9-6C66-4F02-91A2-8ECB23CDB867}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using CortexAccess;
 using System.Threading;
+using System.Collections;
+using System.IO;
 
 namespace MotionLogger
 {
@@ -12,21 +14,41 @@ namespace MotionLogger
     {
         const string Username = "your_username";
         const string Password = "your_password";
-        const string LicenseId = "your_license";
-        const int DebitNumber = 2; // default number of debit
+
+        const string OutFilePath = @"MotionLogger.csv";
+        private static FileStream OutFileStream;
+
         static void Main(string[] args)
         {
+            Console.WriteLine("MOTION LOGGER");
+            Console.WriteLine("Please wear Headset with good signal!!!");
+
+            // Delete Output file if existed
+            if (File.Exists(OutFilePath))
+            {
+                File.Delete(OutFilePath);
+            }
+            OutFileStream = new FileStream(OutFilePath, FileMode.Append, FileAccess.Write);
+
             Process p = new Process();
+
+            // Register Event
+            p.OnMotionDataReceived += OnMotionDataReceived;
+            p.SessionCtr.OnSubcribeMotionOK += OnMotionDataReceived;
+
             Thread.Sleep(5000); //wait for querrying user login
             if (String.IsNullOrEmpty(p.GetUserLogin()))
             {
                 p.Login(Username, Password);
                 Thread.Sleep(1000); //wait for login
             }
+            // Show username login
+            Console.WriteLine("Username :" + p.GetUserLogin());
+
             if (p.AccessCtr.IsLogin)
             {
                 // Send Authorize
-                p.Authorize(LicenseId, DebitNumber);
+                p.Authorize();
                 Thread.Sleep(5000); //wait for authorize
             }
             if (!String.IsNullOrEmpty(p.GetSelectedHeadsetId()) && !String.IsNullOrEmpty(p.GetAccessToken()))
@@ -34,7 +56,6 @@ namespace MotionLogger
                 // Create Sesssion
                 p.CreateSession();
                 Thread.Sleep(5000); //wait for creating session
-
                 if (p.IsCreateSession)
                 {
                     Console.WriteLine("Session have created successfully");
@@ -42,11 +63,39 @@ namespace MotionLogger
                     p.SubcribeData("mot");
                     Thread.Sleep(5000);
                 }
-
             }
 
             Console.WriteLine("Press Enter to exit");
             while (Console.ReadKey().Key != ConsoleKey.Enter) { }
+
+            // Unsubcribe stream
+            p.UnSubcribeData("mot");
+            Thread.Sleep(3000);
+            // Close Out Stream
+            OutFileStream.Dispose();
+        }
+
+        // Write Header and Data to File
+        private static void WriteDataToFile(ArrayList data)
+        {
+            int i = 0;
+            for (; i < data.Count - 1; i++)
+            {
+                byte[] val = Encoding.UTF8.GetBytes(data[i].ToString() + ", ");
+                if (OutFileStream != null)
+                    OutFileStream.Write(val, 0, val.Length);
+                else
+                    break;
+            }
+            // Last element
+            byte[] lastVal = Encoding.UTF8.GetBytes(data[i].ToString() + "\n");
+            if (OutFileStream != null)
+                OutFileStream.Write(lastVal, 0, lastVal.Length);
+        }
+
+        private static void OnMotionDataReceived(object sender, ArrayList motionData)
+        {
+            WriteDataToFile(motionData);
         }
     }
 }

@@ -18,9 +18,8 @@ namespace CortexAccess
             QUERY_PROFILE_LIST = 13,
             DELETE_PROFILE = 14,
             EDIT_PROFILE = 15,
-            SET_ACTIVE_COMMAND = 16,
-            GET_ACTIVE_COMMAND = 17,
-            GET_DETECTION_INFO =18,
+            UPLOAD_PROFILE = 16,
+            GET_DETECTION_INFO =20,
             MCC_START = 30,
             MCC_RESET = 31,
             MCC_REJECT = 32,
@@ -45,6 +44,7 @@ namespace CortexAccess
         private ArrayList _actionLists;
         private ArrayList _controlLists;
         private ArrayList _eventLists;
+        private bool _isLoaded;
 
         // event
         //public event EventHandler<bool> OnLogoutOK;
@@ -55,11 +55,11 @@ namespace CortexAccess
         }
         private TrainingController()
         {
-            Console.WriteLine("TrainingController constructor");
             CmdTrainingAction = "";
             ActionLists = new ArrayList();
             ControlLists = new ArrayList();
             EventLists = new ArrayList();
+            IsLoaded = false;
         }
 
         // Properties
@@ -162,6 +162,19 @@ namespace CortexAccess
             }
         }
 
+        public bool IsLoaded
+        {
+            get
+            {
+                return _isLoaded;
+            }
+
+            private set
+            {
+                _isLoaded = value;
+            }
+        }
+
         // Method
         // Send request to Client
         //public void GetCurrentProfile()
@@ -198,16 +211,30 @@ namespace CortexAccess
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.TRAINING_STREAM, "setupProfile", true, (int)TrainingReqType.CREATE_NEW_PROFILE);
         }
         // Save a profile
-        public void SaveProfile(string token, string profileName)
+        public void SaveProfile(string token, string headsetID, string profileName)
         {
             // Check current profile loaded
+            if (string.IsNullOrEmpty(profileName) || !IsLoaded)
+                return;
 
             // Save Profile
             JObject param = new JObject(
                     new JProperty("_auth", token),
+                    new JProperty("headset", headsetID),
                     new JProperty("profile", profileName),
                     new JProperty("status", "save"));
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.TRAINING_STREAM, "setupProfile", true, (int)TrainingReqType.SAVE_PROFILE);
+        }
+
+        // upload a profile
+        public void UploadProfile(string token, string profileName)
+        {
+            // Save Profile
+            JObject param = new JObject(
+                    new JProperty("_auth", token),
+                    new JProperty("profile", profileName),
+                    new JProperty("status", "upload"));
+            CortexClient.Instance.SendTextMessage(param, (int)StreamID.TRAINING_STREAM, "setupProfile", true, (int)TrainingReqType.UPLOAD_PROFILE);
         }
         // Delete a profile
         public void DeleteProfile(string token, string profileName)
@@ -240,18 +267,6 @@ namespace CortexAccess
             JObject param = new JObject(
                     new JProperty("detection", detection));
             CortexClient.Instance.SendTextMessage(param, (int)StreamID.TRAINING_STREAM, "getDetectionInfo", true, (int)TrainingReqType.GET_DETECTION_INFO);
-        }
-
-        // Training Mental Command and Facial Expression
-        public void StartMentalCmdTraining(string token, string action, string sessionID)
-        {
-            JObject param = new JObject(
-                    new JProperty("_auth", token),
-                    new JProperty("detection", "mentalCommand"),
-                    new JProperty("action", action),
-                    new JProperty("session", sessionID),
-                    new JProperty("status", "start"));
-            CortexClient.Instance.SendTextMessage(param, (int)StreamID.TRAINING_STREAM, "training", true, (int)TrainingReqType.MCC_START);
         }
         // Request Mental Command Training
         public void RequestMentalCmdTraining(string token, int trainingControl, string sessionID)
@@ -330,8 +345,6 @@ namespace CortexAccess
 
         public override void ParseData(JObject data, int requestType = 0)
         {
-
-            Console.WriteLine("Training Controller : ParseData ");
             if (data["result"] != null)
             {
                 JToken result = (JToken)data["result"];
@@ -339,7 +352,6 @@ namespace CortexAccess
                 {
                     case (int)TrainingReqType.GET_DETECTION_INFO:
                         // Store actions lists
-                        
                         // Training Action
                         JArray jActionsArr = (JArray)result["actions"];
                         foreach (var item in jActionsArr)
@@ -352,13 +364,25 @@ namespace CortexAccess
                         {
                             ControlLists.Add((string)item);
                         }
-
                         // Training Events
                         JArray jEventArr = (JArray)result["events"];
                         foreach (var item in jEventArr)
                         {
                             EventLists.Add((string)item);
                         }
+                        break;
+                    case (int)TrainingReqType.CREATE_NEW_PROFILE:
+                        Console.WriteLine("Create Profile Successfully");
+                        break;
+                    case (int)TrainingReqType.LOAD_PROFILE:
+                        IsLoaded = true;
+                        Console.WriteLine("Load Profile Successfully");
+                        break;
+                    case (int)TrainingReqType.SAVE_PROFILE:
+                        Console.WriteLine("Save Profile Successfully");
+                        break;
+                    case (int)TrainingReqType.UPLOAD_PROFILE:
+                        Console.WriteLine("Upload Profile Successfully");
                         break;
                     case (int)TrainingReqType.MCC_START:
                     case (int)TrainingReqType.MCC_ACCEPT:
@@ -376,7 +400,6 @@ namespace CortexAccess
                         break;
                 }
             }
-            //throw new NotImplementedException();
         }
     }
 }

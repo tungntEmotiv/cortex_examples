@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json.Linq;
+using System.Collections;
 
 namespace CortexAccess
 {
@@ -22,9 +23,7 @@ namespace CortexAccess
             INJECT_MARKER = 22,
             UPDATE_NOTE = 23,
             SUBCRIBE_DATA = 30,
-            UNSUBCRIBE_DATA = 31,
-            SUBCRIBE_ALLDATA = 32,
-            UNSUBCRIBE_ALLDATA = 33
+            UNSUBCRIBE_DATA = 31
         }
 
         // Member variables
@@ -41,6 +40,13 @@ namespace CortexAccess
         private string _recordingNote;
         private string _recordingSubject;
 
+        // Event
+        //public event EventHandler<ArrayList> OnSubcribeOK;
+        public event EventHandler<ArrayList> OnSubcribeEEGOK;
+        public event EventHandler<ArrayList> OnSubcribeMotionOK;
+        public event EventHandler<ArrayList> OnSubcribeDevOK;
+        public event EventHandler<ArrayList> OnSubcribeMetOK;
+
         // Constructor
         // Constructor
         static SessionController()
@@ -49,8 +55,7 @@ namespace CortexAccess
         }
         private SessionController()
         {
-            Console.WriteLine("SessionController constructor");
-            NextStatus = "opened";
+            NextStatus = "open";
             _isCreateSession = false;
         }
 
@@ -294,19 +299,17 @@ namespace CortexAccess
 
             if (isSubcribe)
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "subscribe", true, (int)SessionReqType.SUBCRIBE_ALLDATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "subscribe", true, (int)SessionReqType.SUBCRIBE_DATA);
             }
             else
             {
-                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_ALLDATA);
+                CortexClient.Instance.SendTextMessage(param, (int)StreamID.SESSION_STREAM, "unsubscribe", true, (int)SessionReqType.UNSUBCRIBE_DATA);
             }
         }
 
         // Handle Event Reponse
         public override void ParseData(JObject data, int requestType)
         {
-            Console.WriteLine(" Session Controller: reqType" + requestType.ToString());
-            
             if (data["result"] != null)
             {
                 JToken result = (JToken)data["result"];
@@ -327,8 +330,7 @@ namespace CortexAccess
                             _isCreateSession = false;
                             _sessionID = "";
                         }
-                        Console.WriteLine("status " + (string)result["status"]);
-                        // Send create session successfully
+                        // TODO: Send create session successfully
                         break;
                     case (int)SessionReqType.QUERRY_SESSION:
                         //send event queryHeadsets OK
@@ -346,41 +348,101 @@ namespace CortexAccess
                         }
                         break;
                     case (int)SessionReqType.SUBCRIBE_DATA:
-                        //send event queryHeadsets OK
                         JArray jArrResult = (JArray)result;
-                        string sid = "";
-                        foreach (JObject item in jArrResult)
+                        foreach (var item in jArrResult)
                         {
-                            sid = (string)item["sid"];
+                            if (item["eeg"] != null) // EEG
+                            {
+                                ArrayList eegChannelLists = new ArrayList();
+                                JArray cols = (JArray)item["eeg"]["cols"];
+                                foreach (var chanItem in cols)
+                                {
+                                    eegChannelLists.Add((string)chanItem);
+                                }
+                                if(eegChannelLists.Count > 0)
+                                {
+                                    OnSubcribeEEGOK(this, eegChannelLists);
+                                }
+                            }
+                            else if (item["mot"] != null) // Motion
+                            {
+                                ArrayList motChannelLists = new ArrayList();
+                                JArray cols = (JArray)item["mot"]["cols"];
+                                foreach (var chanItem in cols)
+                                {
+                                    motChannelLists.Add((string)chanItem);
+                                }
+                                if (motChannelLists.Count > 0)
+                                {
+                                    OnSubcribeMotionOK(this, motChannelLists);
+                                }
+                            }
+                            else if (item["dev"] != null)
+                            {
+                                ArrayList devChannelLists = new ArrayList();
+                                JArray cols = (JArray)item["dev"]["cols"];
+                                devChannelLists.Add((string)cols[0]); // Batery
+                                devChannelLists.Add((string)cols[1]); // Signal Strength 
+
+                                foreach (var chanItem in cols[2]) // Channel headset
+                                {
+                                    devChannelLists.Add((string)chanItem);
+                                }
+                                if (devChannelLists.Count > 0)
+                                {
+                                    OnSubcribeDevOK(this, devChannelLists);
+                                }
+                            }
+                            else if (item["met"] != null) // Performance Metrics
+                            {
+                                ArrayList metChannelLists = new ArrayList();
+                                JArray cols = (JArray)item["met"]["cols"];
+                                foreach (var chanItem in cols)
+                                {
+                                    metChannelLists.Add((string)chanItem);
+                                }
+                                if (metChannelLists.Count > 0)
+                                {
+                                    OnSubcribeMetOK(this, metChannelLists);
+                                }
+                            }
                         }
-                        Console.WriteLine("sid " + sid);
+                        break;
+                    case (int)SessionReqType.UNSUBCRIBE_DATA:
+                        JArray jResultUnSubcribe = (JArray)result;
+                        foreach(var item in jResultUnSubcribe)
+                        {
+                            string message = (string)item["message"];
+                            Console.WriteLine(message);
+                        }
                         break;
                     case (int)SessionReqType.START_RECORD:
-                        {
-                            // Store record information
-                            _isRecording = (bool)result["recording"];
-                            break;
-                        }
+                        // TODO: Store record information
+                        Console.WriteLine("\nStart RECORD successfully");
+                        _isRecording = (bool)result["recording"];
+                        break;
                     case (int)SessionReqType.STOP_RECORD:
+                        Console.WriteLine("\nStop RECORD successfully");
                         JToken recordInfo = data["result"];
                         _isRecording = (bool)result["recording"];
-                        // Send stop event
+                        // TODO: Send stop event
                         break;
                     case (int)SessionReqType.INJECT_MARKER:
-                        // Store marker
+                        // TODO: Store marker
                         JArray markers = (JArray)result["markers"];
-
+                        foreach(var item in markers)
+                        {
+                            int code = (int)item["code"];
+                            string label = (string)item["label"];
+                            string port = (string)item["port"];
+                            Console.WriteLine("MARKERS: code:" + code.ToString() + " label: " + label + " port: " + port);
+                        }
                         break;
                     default:
                         break;
                 }
             }
-            // throw new NotImplementedException();
         }
-
-        // Set Record Information
-
-        // Get Current Record Information
 
         // Clear Session Info
         public void ClearSessionControllerData()
@@ -393,8 +455,6 @@ namespace CortexAccess
             RecordingName = "";
             RecordingNote = "";
             RecordingSubject = "";
-    }
-
-
+        }
     }
 }
